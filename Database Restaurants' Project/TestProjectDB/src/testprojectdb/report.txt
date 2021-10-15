@@ -1,0 +1,7 @@
+select i.ITEM_TYPE, i.ITEM_NAME, sum(o.AMOUNT) as "Total Sold"
+from USERS_MENU_ORDER o join RESTAURANTS_AUTHORITY au on(o.REST_ID = au.REST_ID and o.LOCATION_ID = au.LOCATION_ID)
+join AUTHORITIES a on (a.AUTH_ID = au.AUTH_ID)
+join MENU_ITEMS i on (o.ITEM_ID = i.ITEM_ID)
+where a.AUTH_USER_NAME = 'au'
+GROUP BY o.ITEM_ID, i.ITEM_TYPE, i.ITEM_NAME
+order by "Total Sold" desc;

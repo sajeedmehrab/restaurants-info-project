@@ -1,0 +1,197 @@
+        editOffer.setOnAction(new EventHandler<ActionEvent>() {
+            String MNSelectedLocTHR = new String();
+            String MNSelectedResTHR = new String();
+            String MNSelectedItT = new String();
+            String MNSelectedItN = new String();
+
+            public void handle(ActionEvent event) {
+                Scene menratscene;
+                GridPane RateMN = new GridPane();
+                RateMN.setVgap(20);
+                RateMN.setHgap(20);
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+
+                try {
+
+                    String sql = "SELECT LOCATION_NAME FROM LOCATIONS l join RESTAURANTS_AUTHORITY ra on (l.LOCATION_ID = ra.LOCATION_ID) join AUTHORITIES a on (a.AUTH_ID = ra.AUTH_ID) where AUTH_USER_NAME = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, uname);
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        MNSelectedLocTHR = rs.getString(1);
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                conC = new ConnectionClass();
+                con = conC.getConnection();
+                try {
+
+                    String sql = "SELECT RESTAURANT_NAME FROM RESTAURANTS r join RESTAURANTS_AUTHORITY ra on (r.REST_ID = ra.REST_ID) join AUTHORITIES a on (a.AUTH_ID = ra.AUTH_ID) where AUTH_USER_NAME = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, uname);
+
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        MNSelectedResTHR = rs.getString(1);
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                //System.out.println(MNSelectedLocTHR);
+                //System.out.println(MNSelectedResTHR);
+                ChoiceBox MNRit = new ChoiceBox();
+                conC = new ConnectionClass();
+                con = conC.getConnection();
+                List MNRlistits = new ArrayList();
+
+                //System.out.println(MNSelectedLocTHR);
+                //System.out.println(MNSelectedResTHR);
+                try {
+
+                    String sql = "select DISTINCT mi.ITEM_TYPE from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (bm.LOCATION_ID = l.LOCATION_ID) join MENU_ITEMS mi on (mi.ITEM_ID = bm.ITEM_ID) where RESTAURANT_NAME = ? AND LOCATION_NAME = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, MNSelectedResTHR);
+                    pst.setString(2, MNSelectedLocTHR);
+
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        MNRlistits.add(rs.getString(1));
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                MNRit.getItems().addAll(MNRlistits);
+                MNRit.setValue(MNRlistits.get(0));
+                MNRit.setPrefSize(250, 40);
+                RateMN.add(MNRit, 2, 1);
+
+                Button b = new Button("Choose");
+                RateMN.add(b, 2, 4);
+
+                b.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        MNSelectedItT = (String) MNRit.getValue();
+                        
+                        Scene insideb;
+                        GridPane bp = new GridPane();
+                        bp.setVgap(20);
+                        bp.setHgap(20);
+
+                        ChoiceBox bit = new ChoiceBox();
+                        ConnectionClass conC = new ConnectionClass();
+                        Connection con = conC.getConnection();
+                        List blistits = new ArrayList();
+
+                        //System.out.println(MNSelectedLocTHR);
+                        //System.out.println(MNSelectedResTHR);
+                        try {
+
+                            String sql = "select DISTINCT mi.ITEM_NAME from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (bm.LOCATION_ID = l.LOCATION_ID) join MENU_ITEMS mi on (mi.ITEM_ID = bm.ITEM_ID) where RESTAURANT_NAME = ? AND LOCATION_NAME = ? AND ITEM_TYPE = ?";
+                            PreparedStatement pst = con.prepareStatement(sql);
+                            pst.setString(1, MNSelectedResTHR);
+                            pst.setString(2, MNSelectedLocTHR);
+                            pst.setString(3, MNSelectedItT);
+                            
+
+                            ResultSet rs = pst.executeQuery();
+                            while (rs.next()) {
+                                blistits.add(rs.getString(1));
+                            }
+                            pst.close();
+                            con.close();
+                            conC.closeConnection();
+
+                            //System.out.println(uname);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        bit.getItems().addAll(blistits);
+                        bit.setValue(blistits.get(0));
+                        bit.setPrefSize(250, 40);
+                        bp.add(bit, 2, 1);
+
+                        TextField mnc = new TextField();
+                        mnc.setPrefSize(250, 40);
+                        mnc.setPromptText("Enter Offer");
+                        bp.add(mnc, 2, 7);
+
+                        Button bok = new Button("Insert");
+
+                        bp.add(MNRok, 5, 10);
+
+                        bok.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent event) {
+
+                                ConnectionClass conC = new ConnectionClass();
+                                Connection con = conC.getConnection();
+                                try {
+
+                                    CallableStatement ins = con.prepareCall("{?= call SET_BRANCH_MENU(?,?,?,?,?,'YES',?)}");
+
+                                    ins.setString(2, MNSelectedResTHR);
+                                    ins.setString(3, MNSelectedLocTHR);
+                                    ins.setString(4, MNSelectedItT);
+                                    ins.setString(5, MNSelectedItN);
+                                    ins.setDouble(6, Double.parseDouble(mnating.getText()));
+                                    ins.setString(7, mnc.getText());
+                                    ins.registerOutParameter(1, Types.INTEGER);
+                                    ins.execute();
+                                    System.out.println(ins.getInt(1));
+
+                                    if (ins.getInt(1) != 1) {
+                                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                                        alert.setTitle("Insert Error");
+                                        alert.setHeaderText("Insert Error");
+                                        alert.setContentText("Make sure the branch menu is not already inserted!");
+                                        alert.showAndWait();
+                                    }
+
+                                    ins.close();
+                                    con.close();
+                                    conC.closeConnection();
+
+                                    primaryStage.setScene(authorityHome);
+
+                                    //System.out.println(uname);
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+                                //INSERT INTO RESTAURANTS_BRANCHES (REST_ID, LOCATION_ID, MANAGER_NAME, ADDRESS, CONTACT_NUMBER, OPEN_TIME, CLOSE_TIME, WEEKLY_HOLIDAY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)    
+                                //primaryStage.setScene(adminHome);
+
+                            }
+                        });
+                        
+                        insideb = new Scene(bp, 500,500);
+                        primaryStage.setScene(insideb);
+                        
+
+                    }
+                });
+
+                menratscene = new Scene(RateMN, 500, 500);
+
+                primaryStage.setScene(menratscene);
+
+            }
+        });

@@ -1,0 +1,715 @@
+@Override
+    public void start(Stage primaryStage) {
+
+        primaryStage.show();
+
+        Scene tobeBuilt;
+        VBox tbbvb = new VBox();
+        Label oops = new Label("Oops! Looks like this page has not been developed yet!");
+        Button backfromtbb = new Button("Back");
+        tbbvb.getChildren().addAll(oops, backfromtbb);
+        tobeBuilt = new Scene(tbbvb, 400, 400);
+
+        Scene loginScene;
+        ChoiceBox usertype = new ChoiceBox();
+        usertype.getItems().addAll("User", "Admin", "Authority");
+        usertype.setValue("User");
+        TextField usernameli = new TextField();
+        usernameli.setPromptText("Enter Username...");
+        PasswordField passwordli = new PasswordField();
+        passwordli.setPromptText("Enter Password");
+        Button liokButton = new Button("Login");
+        Label suprompt = new Label("Don't have an account? Sign up instead!");
+        Button toSignup = new Button("Sign Up");
+        VBox loginLayout = new VBox();
+        loginLayout.getChildren().addAll(usertype, usernameli, passwordli, liokButton, suprompt, toSignup);
+        loginScene = new Scene(loginLayout, 400, 400);
+        primaryStage.setScene(loginScene);
+        primaryStage.setTitle("Welcome!");
+
+        Button logoutloc = new Button("Logout");
+        logoutloc.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+            }
+        });
+
+        //HomeScene
+        Scene HomeScene;
+        GridPane hsGridPane = new GridPane();
+        hsGridPane.setVgap(20);
+        hsGridPane.setHgap(20);
+        HomeScene = new Scene(hsGridPane, 500, 500);
+        Button PlanMeal = new Button("Plan a Meal!");
+        PlanMeal.setPrefSize(250, 40);
+        hsGridPane.add(PlanMeal, 5, 10);
+        Button ShowRestB = new Button("See All Restaurants!");
+        ShowRestB.setPrefSize(250, 40);
+        hsGridPane.add(ShowRestB, 5, 12);
+
+        Scene scene;
+        GridPane root = new GridPane();
+        root.setVgap(20);
+        root.setHgap(20);
+        root.setAlignment(Pos.CENTER);
+        scene = new Scene(root, 500, 500);
+        scene.setFill(Color.BLACK);
+        ChoiceBox cb = new ChoiceBox();
+
+        ConnectionClass conC = new ConnectionClass();
+        Connection con = conC.getConnection();
+        List listlocs = new ArrayList();
+        try {
+
+            String sql = "SELECT LOCATION_NAME FROM LOCATIONS";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                listlocs.add(rs.getString(1));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+            //System.out.println(uname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        cb.getItems().addAll(listlocs);
+        cb.setValue(listlocs.get(0));
+        cb.setPrefSize(250, 40);
+        root.add(cb, 1, 2);
+
+        ChoiceBox cb2 = new ChoiceBox();
+
+        conC = new ConnectionClass();
+        con = conC.getConnection();
+        List listitems = new ArrayList();
+        try {
+
+            String sql = "SELECT DISTINCT ITEM_TYPE FROM MENU_ITEMS";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                listitems.add(rs.getString(1));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+            //System.out.println(uname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        cb2.getItems().addAll(listitems);
+        cb2.setValue(listitems.get(0));
+        cb2.setPrefSize(250, 40);
+        root.add(cb2, 1, 4);
+
+        TextField pricePlan = new TextField();
+        pricePlan.setPrefSize(250, 40);
+        root.add(pricePlan, 1, 5);
+
+        Button backtoHomeScene = new Button("Back");
+        backtoHomeScene.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(HomeScene);
+            }
+        });
+        root.add(backtoHomeScene, 2, 12);
+
+        Button b2 = new Button("All Set!");
+        b2.setPrefSize(100, 50);
+        root.add(b2, 2, 5);
+
+        b2.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+                ObservableList<Result> results = FXCollections.observableArrayList();
+
+                try {
+                    ///insert query here
+                    String sql = "select r.RESTAURANT_NAME, rb.ADDRESS, i.ITEM_NAME, bm.PRICE, bm.OFFER, GET_BRANCHMENU_AVGRATING(r.RESTAURANT_NAME, l.LOCATION_NAME, i.ITEM_ID) from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (l.LOCATION_ID = bm.LOCATION_ID) join MENU_ITEMS i on (i.ITEM_ID = bm.ITEM_ID) join RESTAURANTS_BRANCHES rb on (bm.REST_ID = rb.REST_ID and bm.LOCATION_ID = rb.LOCATION_ID) where l.LOCATION_NAME = ? AND i.ITEM_TYPE = ?";
+
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, (String) cb.getValue());
+                    pst.setString(2, (String) cb2.getValue());
+                    ResultSet rs = pst.executeQuery();
+
+                    while (rs.next()) {
+
+                        /*System.out.print(rs.getString(1)+ " ") ;
+                                System.out.print(rs.getString(2)+ " ") ;
+                                System.out.print(rs.getString(3)+ " ") ;
+                                System.out.print(rs.getInt(4)+ " ") ;
+                                System.out.print(rs.getString(5)+ " ") ;
+                                System.out.println("");*/
+                        String str1 = rs.getString(1);
+                        String str2 = rs.getString(2);
+                        String str3 = rs.getString(3);
+                        String str4 = Integer.toString(rs.getInt(4));
+                        String str5 = rs.getString(5);
+                        String str6 = Double.toString(rs.getDouble(6));
+
+                        results.add(new Result(str1, str2, str3, str4, str5, str6));
+
+                    }
+
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                } catch (SQLException e) {
+                    System.out.println("Check it from console");
+                    e.printStackTrace();
+                }
+
+                TableView<Result> table;
+                primaryStage.setTitle("Results");
+
+                TableColumn<Result, String> rest_nameColumn = new TableColumn<>("Restaurant_Name");
+                rest_nameColumn.setMinWidth(200);
+                rest_nameColumn.setCellValueFactory(new PropertyValueFactory<>("Restaurant_Name"));
+
+                TableColumn<Result, String> AddressColumn = new TableColumn<>("Address");
+                AddressColumn.setMinWidth(200);
+                AddressColumn.setCellValueFactory(new PropertyValueFactory<>("Address"));
+
+                TableColumn<Result, String> Item_NameColumn = new TableColumn<>("Item_Name");
+                Item_NameColumn.setMinWidth(200);
+                Item_NameColumn.setCellValueFactory(new PropertyValueFactory<>("Item_Name"));
+
+                TableColumn<Result, String> PriceColumn = new TableColumn<>("Price");
+                PriceColumn.setMinWidth(100);
+                PriceColumn.setCellValueFactory(new PropertyValueFactory<>("Price"));
+
+                TableColumn<Result, String> OfferColumn = new TableColumn<>("Offer");
+                OfferColumn.setMinWidth(200);
+                OfferColumn.setCellValueFactory(new PropertyValueFactory<>("Offer"));
+
+                TableColumn<Result, String> RatingColumn = new TableColumn<>("Rating");
+                RatingColumn.setMinWidth(200);
+                RatingColumn.setCellValueFactory(new PropertyValueFactory<>("Rating"));
+
+                table = new TableView<>();
+                table.setItems(results);
+                table.getColumns().addAll(rest_nameColumn, AddressColumn, Item_NameColumn, PriceColumn, OfferColumn, RatingColumn);
+
+                Button logoutres = new Button("LOGOUTRES");
+                logoutres.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        primaryStage.setScene(loginScene);
+                    }
+                });
+
+                Button goBackToPlanning = new Button("Back to Planning");
+                goBackToPlanning.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        primaryStage.setScene(scene);
+                    }
+                });
+
+                VBox vbox = new VBox();
+                vbox.getChildren().addAll(table, logoutres, goBackToPlanning);
+
+                Scene resultScene = new Scene(vbox);
+                primaryStage.setScene(resultScene);
+                primaryStage.show();
+            }
+        });
+
+        root.add(logoutloc, 2, 10);
+
+        /// All restaurants Scene
+        Scene TransHomeRest;
+        GridPane TransHomeRestGP = new GridPane();
+        TransHomeRestGP.setVgap(20);
+        TransHomeRestGP.setHgap(20);
+
+        ChoiceBox THRlocations = new ChoiceBox();
+        conC = new ConnectionClass();
+        con = conC.getConnection();
+        List THRlistlocs = new ArrayList();
+        try {
+
+            String sql = "SELECT LOCATION_NAME FROM LOCATIONS";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                THRlistlocs.add(rs.getString(1));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+            //System.out.println(uname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        THRlocations.getItems().addAll(THRlistlocs);
+        THRlocations.setValue(THRlistlocs.get(0));
+        THRlocations.setPrefSize(250, 40);
+
+        Button THRok = new Button("Select");
+
+        TransHomeRestGP.add(THRlocations, 2, 4);
+        TransHomeRestGP.add(THRok, 5, 4);
+        TransHomeRest = new Scene(TransHomeRestGP, 500, 500);
+        //END OF TRANS HOME REST SCENE
+
+        THRok.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String SelectedLocTHR = (String) THRlocations.getValue();
+
+                Scene RestaurantsRes;
+                GridPane ShowRestGP = new GridPane();
+                ShowRestGP.setVgap(1);
+                ShowRestGP.setHgap(20);
+
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+                List listofrests = new ArrayList();
+                int no_of_rests = 0;
+                try {
+
+                    String sql = "select r.restaurant_name from restaurants_branches rb join restaurants r using (rest_id) join locations l using (location_id) where l.location_name = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, SelectedLocTHR);
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        listofrests.add(rs.getString(1));
+                        no_of_rests++;
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+                    System.out.println(no_of_rests);
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(no_of_rests);
+
+                //System.out.println(listofrests.get(1));
+                for (int i = 0; i < no_of_rests; i++) {
+                    Button temp = new Button((String) listofrests.get(i));
+                    temp.setPrefSize(400, 90);
+                    System.out.println(temp.getText());
+
+                    temp.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            System.out.println(temp.getText());
+                            ConnectionClass conC = new ConnectionClass();
+                            Connection con = conC.getConnection();
+                            ObservableList<MenuResults> menu = FXCollections.observableArrayList();
+                            try {
+                                String sql = "SELECT i.item_name, i.item_type, bm.price FROM BRANCH_MENUS bm JOIN RESTAURANTS r using (rest_id) join locations l using (location_id) join menu_items i using (item_id) where r.restaurant_name = ? and l.location_name = ? ";
+                                PreparedStatement pst = con.prepareStatement(sql);
+                                pst.setString(1, temp.getText());
+                                pst.setString(2, SelectedLocTHR);
+                                ResultSet rs = pst.executeQuery();
+                                while (rs.next()) {
+                                    String str1 = rs.getString(1);
+                                    String str2 = rs.getString(2);
+                                    String str3 = Integer.toString(rs.getInt(3));
+                                    menu.add(new MenuResults(str1, str2, str3));
+                                }
+                                pst.close();
+                                con.close();
+                                conC.closeConnection();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+
+                            TableView<MenuResults> menuTable;
+
+                            TableColumn<MenuResults, String> Item_NameColumn = new TableColumn<>("Item_Name");
+                            //rest_nameColumn.setMinWidth(200);
+                            Item_NameColumn.setCellValueFactory(new PropertyValueFactory<>("Item_Name"));
+
+                            TableColumn<MenuResults, String> Item_TypeColumn = new TableColumn<>("Item_Type");
+                            //rest_nameColumn.setMinWidth(200);
+                            Item_TypeColumn.setCellValueFactory(new PropertyValueFactory<>("Item_Type"));
+
+                            TableColumn<MenuResults, String> PriceColumn = new TableColumn<>("Price");
+                            //rest_nameColumn.setMinWidth(200);
+                            PriceColumn.setCellValueFactory(new PropertyValueFactory<>("Price"));
+
+                            menuTable = new TableView<>();
+                            menuTable.setItems(menu);
+                            menuTable.getColumns().addAll(Item_NameColumn, Item_TypeColumn, PriceColumn);
+
+                            VBox vbox = new VBox();
+                            vbox.getChildren().addAll(menuTable);
+
+                            Scene menuScene = new Scene(vbox);
+                            primaryStage.setScene(menuScene);
+
+                        }
+                    });
+
+                    ShowRestGP.add(temp, 0, i + 30);
+                }
+                ScrollPane ShowRestSp = new ScrollPane();
+                ShowRestSp.setContent(ShowRestGP);
+                RestaurantsRes = new Scene(ShowRestSp, 400, 400);
+
+                primaryStage.setScene(RestaurantsRes);
+            }
+        });
+
+        ///End of restaurants Scene
+        PlanMeal.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(scene);
+            }
+        });
+
+        ShowRestB.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(TransHomeRest);
+            }
+        });
+
+        Scene signupScene;
+        TextField usernameInput = new TextField();
+        usernameInput.setPromptText("Insert First Name...");
+        TextField FirstNameInput = new TextField();
+        FirstNameInput.setPromptText("Insert First Name...");
+        TextField LastNameInput = new TextField();
+        LastNameInput.setPromptText("Insert Last Name...");
+        TextField emailInput = new TextField();
+        emailInput.setPromptText("Insert email...");
+        TextField PhoneInput = new TextField();
+        PhoneInput.setPromptText("Insert Phone Number...");
+        TextField GenderInput = new TextField();
+        GenderInput.setPromptText("Insert Gender... Male/Female");
+        PasswordField pb = new PasswordField();
+        pb.setPromptText("Set a Password");
+        Button suokButton = new Button("Ok");
+        ChoiceBox genderbox = new ChoiceBox();
+        genderbox.getItems().addAll("Male", "Female");
+        genderbox.setValue("Female");
+        Label liprompt = new Label("Already have an account? Login instead!");
+        Button toli = new Button("Login");
+        VBox loginLay = new VBox();
+        loginLay.getChildren().addAll(usernameInput, FirstNameInput, LastNameInput, emailInput, PhoneInput, genderbox, pb, suokButton, liprompt, toli);
+        signupScene = new Scene(loginLay, 400, 400);
+
+        Scene insertMenuScene;
+        VBox insertMenuvb = new VBox();
+        Label restnameprompt = new Label("Insert Name of the Item:");
+        TextField itemnameinput = new TextField();
+        Label itemtypeprompt = new Label("What type of item is this?");
+        TextField itemtypeinput = new TextField();
+        Button imok = new Button("NEXT");
+        insertMenuvb.getChildren().addAll(restnameprompt, itemnameinput, itemtypeprompt, itemtypeinput, imok);
+        insertMenuScene = new Scene(insertMenuvb, 400, 400);
+
+        imok.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+                try {
+                    String sql = "INSERT INTO MENU_ITEMS (ITEM_ID, ITEM_TYPE, ITEM_NAME) VALUES (USER_ID_SEQ.NEXTVAL, ?, ?)";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, itemtypeinput.getText());
+                    pst.setString(2, itemnameinput.getText());
+                    ResultSet rs = pst.executeQuery();
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+                    primaryStage.setScene(tobeBuilt);
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        Scene adminHome;
+        VBox admhomevb = new VBox();
+        Label greetadm = new Label("Welcome Admin!");
+        Label admOptions = new Label("Insert a restaurant. Press on the button below to insert a menu item!");
+        Button gotoInsertMenu = new Button("Insert Menu Item");
+        gotoInsertMenu.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(insertMenuScene);
+            }
+        });
+
+        conC = new ConnectionClass();
+        con = conC.getConnection();
+        List listRest = new ArrayList();
+        List listLoc = new ArrayList();
+        try {
+            String sql = "SELECT RESTAURANT_NAME FROM RESTAURANTS";
+
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                listRest.add(rs.getString(1));
+            }
+            sql = "SELECT LOCATION_NAME FROM LOCATIONS";
+            pst = con.prepareStatement(sql);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                listLoc.add(rs.getString(1));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+            //System.out.println(uname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        ChoiceBox admListRestaurants = new ChoiceBox();
+        admListRestaurants.getItems().addAll(listRest);
+        admListRestaurants.setValue(listRest.get(0));
+        ChoiceBox admListLocs = new ChoiceBox();
+        admListLocs.getItems().addAll(listLoc);
+        admListLocs.setValue(listLoc.get(0));
+        Button admAddBranch = new Button("Confirm Restaurant!");
+        TextField mngrname = new TextField();
+        mngrname.setPromptText("MANAGER_NAME");
+        TextField adrs = new TextField();
+        adrs.setPromptText("Address");
+        TextField num = new TextField();
+        num.setPromptText("Contact Number");
+        TextField opentime = new TextField();
+        opentime.setPromptText("Open Time");
+        TextField closetime = new TextField();
+        closetime.setPromptText("Close Time");
+        TextField holiday = new TextField();
+        holiday.setPromptText("Weekly Holiday");
+        Button logoutadmhome = new Button("LOGOUTADMHOME");
+        logoutadmhome.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+            }
+        });
+        admhomevb.getChildren().addAll(greetadm, admOptions, gotoInsertMenu, admListRestaurants, admListLocs, mngrname, adrs, num, opentime, closetime, holiday, admAddBranch, logoutadmhome);
+        adminHome = new Scene(admhomevb, 400, 400);
+
+        backfromtbb.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(adminHome);
+            }
+        });
+
+        admAddBranch.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                int restid = 0, locid = 0;
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+                try {
+                    String sql = "select rest_id from restaurants where RESTAURANT_NAME = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, (String) admListRestaurants.getValue());
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        restid = rs.getInt(1);
+                    }
+
+                    sql = "select location_id from locations where location_name = ?";
+                    pst = con.prepareStatement(sql);
+                    pst.setString(1, (String) admListLocs.getValue());
+                    rs = pst.executeQuery();
+                    while (rs.next()) {
+                        locid = rs.getInt(1);
+                    }
+                    sql = "INSERT INTO RESTAURANTS_BRANCHES (REST_ID, LOCATION_ID, MANAGER_NAME, ADDRESS, CONTACT_NUMBER, OPEN_TIME, CLOSE_TIME, WEEKLY_HOLIDAY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    pst = con.prepareStatement(sql);
+                    pst.setInt(1, restid);
+                    pst.setInt(2, locid);
+                    pst.setString(3, mngrname.getText());
+                    pst.setString(4, adrs.getText());
+                    pst.setString(5, num.getText());
+                    pst.setString(6, opentime.getText());
+                    pst.setString(7, closetime.getText());
+                    pst.setString(8, holiday.getText());
+                    rs = pst.executeQuery();
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Insert Error");
+                    alert.setHeaderText("Insert Error");
+                    alert.setContentText("Make sure the branch is not already registered!");
+                    alert.showAndWait();
+                }
+                //INSERT INTO RESTAURANTS_BRANCHES (REST_ID, LOCATION_ID, MANAGER_NAME, ADDRESS, CONTACT_NUMBER, OPEN_TIME, CLOSE_TIME, WEEKLY_HOLIDAY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)    
+
+            }
+        });
+
+        //primaryStage.setScene(signupScene);
+        //primaryStage.setTitle("Signup");
+        /*liokButton.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event){
+                
+            }
+        });*/
+        toli.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+                primaryStage.setTitle("Welcome!");
+            }
+        });
+
+        liokButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String uname = usernameli.getText();
+                String pass = passwordli.getText();
+                System.out.println(uname + pass);
+                //primaryStage.setScene(scene);
+                boolean success = false;
+                if ((String) usertype.getValue() == "User") {
+                    success = new Users().validateLogin(uname, pass);
+                } else if ((String) usertype.getValue() == "Admin") {
+                    success = new Admins().validateLogin(uname, pass);
+                } else if ((String) usertype.getValue() == "Authority") {
+
+                }
+
+                if (success && (String) usertype.getValue() == "User") {
+                    // successful login
+                    try {
+                        primaryStage.setScene(HomeScene); // ei jaygay homeScene ashbe
+                        primaryStage.setTitle("Home");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                } else if (success && (String) usertype.getValue() == "Admin") {
+                    //System.out.println("Admin Logged in");
+                    try {
+                        primaryStage.setScene(adminHome);
+                        primaryStage.setTitle("Home");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    // failed login
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Incorrect Credentials");
+                    alert.setHeaderText("Incorrect Credentials");
+                    alert.setContentText("The username and password you provided is not correct.");
+                    alert.showAndWait();
+                }
+
+            }
+        });
+
+        toSignup.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(signupScene);
+                primaryStage.setTitle("Sign UP");
+            }
+        });
+
+        Scene suSuccess;
+        Label signedUp = new Label("Congrats! Sign Up Successful!");
+        Button toWelcomeScene = new Button("Log in");
+        VBox sus = new VBox();
+        sus.getChildren().addAll(signedUp, toWelcomeScene);
+        suSuccess = new Scene(sus, 400, 400);
+
+        toWelcomeScene.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+                primaryStage.setTitle("Welcome!");
+            }
+        });
+
+        suokButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String uname, fname, lname, email, number, gender, password;
+                uname = usernameInput.getText();
+                fname = FirstNameInput.getText();
+                lname = LastNameInput.getText();
+                email = emailInput.getText();
+                number = PhoneInput.getText();
+                gender = (String) genderbox.getValue();
+                password = pb.getText();
+
+                //primaryStage.setScene(scene);
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+
+                try {
+
+                    String sql = "INSERT into users (user_id, username, email, FIRSTNAME, LASTNAME, PASSWORD, USER_NUMBER, GENDER) values (user_id_seq.nextval, ? , ? , ? , ? , ? , ? , ?)";
+
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, uname);
+                    pst.setString(2, email);
+                    pst.setString(3, fname);
+                    pst.setString(4, lname);
+                    pst.setString(5, password);
+                    pst.setString(6, number);
+                    pst.setString(7, gender);
+
+                    ResultSet rs = pst.executeQuery();
+
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                    //System.out.println(uname);
+                    primaryStage.setScene(suSuccess);
+
+                } catch (SQLException e) {
+                    System.out.println("Invalid Sign Up!");
+                    //e.printStackTrace();
+                    //System.out.println("Not printed");
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Invalid Sign Up");
+                    alert.setHeaderText("Invalid Sign Up");
+                    alert.setContentText("Please fill all the fields or try a different username!");
+                    alert.showAndWait();
+                }
+
+            }
+
+        });
+    }
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        launch(args);
+    }

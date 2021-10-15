@@ -1,0 +1,103 @@
+CREATE SEQUENCE rest_id_seq
+increment by 1
+start with 1
+maxvalue 10000
+nocycle;
+
+CREATE SEQUENCE order_id_seq
+increment by 1
+start with 1
+maxvalue 100000
+nocycle;
+
+CREATE SEQUENCE type_id_seq
+increment by 1
+start with 1
+maxvalue 10000
+nocycle;
+
+CREATE SEQUENCE req_type_id_seq
+increment by 1
+start with 1
+maxvalue 10000
+nocycle;
+
+
+CREATE SEQUENCE location_id_seq
+increment by 1
+start with 1
+maxvalue 10000
+nocycle;
+
+CREATE SEQUENCE user_id_seq
+increment by 1
+start with 1
+maxvalue 10000
+nocycle;
+
+CREATE SEQUENCE item_id_seq
+increment by 1
+start with 1
+maxvalue 10000
+nocycle;
+
+CREATE SEQUENCE admin_id_seq
+increment by 1
+start with 1
+maxvalue 10000
+nocycle;
+
+CREATE SEQUENCE auth_id_seq
+increment by 1
+start with 1
+maxvalue 10000
+nocycle;
+
+CREATE SEQUENCE bm_id_seq
+increment by 1
+start with 1
+maxvalue 1000000
+nocycle;
+
+CREATE SEQUENCE baa_id_seq
+increment by 1
+start with 1
+maxvalue 100000
+nocycle;
+
+CREATE SEQUENCE ra_id_seq
+increment by 1
+start with 1
+maxvalue 100000
+nocycle;
+
+CREATE SEQUENCE rb_id_seq
+increment by 1
+start with 1
+maxvalue 100000
+nocycle;
+
+CREATE SEQUENCE uaa_id_seq
+increment by 1
+start with 1
+maxvalue 100000
+nocycle;
+
+CREATE SEQUENCE ubr_id_seq
+increment by 1
+start with 1
+maxvalue 100000
+nocycle;
+
+CREATE SEQUENCE umr_id_seq
+increment by 1
+start with 1
+maxvalue 100000
+nocycle;
+
+CREATE SEQUENCE aaa_id_seq
+increment by 1
+start with 1
+maxvalue 100000
+nocycle;
+

@@ -1,0 +1,41 @@
+ConnectionClass conC = new ConnectionClass();
+        Connection con = conC.getConnection();
+
+        try {
+            //String sql = "SELECT Location FROM Restaurants WHERE restaurant_id = ?";
+
+            //String sql = "INSERT INTO RESTAURANTS VALUES (004, 'Dhanmondi', 'IBNSINA, Dhaka', '2005', '8:00', '22:00', 'Friday', 8)";
+            //String sql = "SET_BRANCHMENU_RATING(?,?,?,?,?,?,?)";
+            CallableStatement pst = con.prepareCall("{?= call SET_BRANCHMENU_RATING(?,?,?,?,?,?,?)}");
+
+            //PreparedStatement pst = con.prepareStatement(sql); 
+            pst.setString(2, "TAKEOUT");
+            pst.setString(3, "DHANMONDI");
+            pst.setString(4, "ICE CREAM");
+            pst.setString(5, "CHOCOLATE");
+            pst.setString(6, "newuser");
+            pst.setInt(7, 7);
+            pst.setString(8, "GOOD");
+
+            pst.registerOutParameter(1, Types.INTEGER);
+
+            /*
+            ResultSet rs = pst.executeQuery();
+
+            while (rs.next()) {
+                System.out.println(rs.getInt(1));
+
+            }
+            */
+
+            pst.execute();
+            System.out.println(pst.getInt(1));
+            //pst.setInt(1, 2);
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+        } catch (SQLException e) {
+            System.out.println("Check it from console");
+            e.printStackTrace();
+        }

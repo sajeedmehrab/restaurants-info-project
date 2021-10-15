@@ -1,0 +1,36 @@
+
+TableColumn actionCol = new TableColumn("Place Order");
+                actionCol.setCellValueFactory(new PropertyValueFactory<>("DUMMY"));
+
+                Callback<TableColumn<Result, String>, TableCell<Result, String>> cellFactory
+                        = //
+                        new Callback<TableColumn<Result, String>, TableCell<Result, String>>() {
+                    @Override
+                    public TableCell call(final TableColumn<Result, String> param) {
+                        final TableCell<Result, String> cell = new TableCell<Result, String>() {
+
+                            final Button btn = new Button("Order");
+
+                            @Override
+                            public void updateItem(String item, boolean empty) {
+                                super.updateItem(item, empty);
+                                if (empty) {
+                                    setGraphic(null);
+                                    setText(null);
+                                } else {
+                                    btn.setOnAction(event -> {
+                                        Result r = getTableView().getItems().get(getIndex());
+                                        System.out.println(r.getItem_Name() + r.getRestaurant_Name() + r.getPrice() + r.getOffer() + r.getAddress());
+                                        // eikhane sql boshbe
+                                       
+                                    });
+                                    setGraphic(btn);
+                                    setText(null);
+                                }
+                            }
+                        };
+                        return cell;
+                    }
+                };
+
+                actionCol.setCellFactory(cellFactory);

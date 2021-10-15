@@ -1,0 +1,61 @@
+Scene mnscene;
+                            GridPane mnroot = new GridPane();
+                            mnroot.setVgap(20);
+                            mnroot.setHgap(20);
+                            mnroot.setAlignment(Pos.CENTER);
+                            mnscene = new Scene(mnroot, 500, 500);
+                            mnscene.setFill(Color.BLACK);
+
+                            TextField mnating = new TextField();
+                            mnating.setPrefSize(250, 40);
+                            mnating.setPromptText("Enter Rating");
+                            mnroot.add(mnating, 1, 3);
+
+                            TextField mnc = new TextField();
+                            mnc.setPrefSize(250, 40);
+                            mnc.setPromptText("Enter Comment");
+                            mnroot.add(mnc, 1, 5);
+
+                            Button mnok = new Button("Enter");
+                            mnroot.add(mnok, 5, 4);
+
+                            mnok.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override
+                                public void handle(ActionEvent event) {
+                                    ConnectionClass conC = new ConnectionClass();
+                                    Connection con = conC.getConnection();
+                                    try {
+
+                                        CallableStatement ins = con.prepareCall("{?= call SET_BRANCH_RATING(?,?,?,?,?)}");
+
+                                        ins.setString(2, MNSelectedResTHR);
+                                        ins.setString(3, MNSelectedLocTHR);
+                                        ins.setString(4, usernameli.getText());
+                                        ins.setInt(5, Integer.parseInt(mnating.getText()));
+                                        ins.setString(6, mnc.getText());
+                                        ins.registerOutParameter(1, Types.INTEGER);
+                                        ins.execute();
+                                        System.out.println(ins.getInt(1));
+
+                                        if (ins.getInt(1) != 1) {
+                                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                                            alert.setTitle("Insert Error");
+                                            alert.setHeaderText("Insert Error");
+                                            alert.setContentText("Make sure the branch is not already rated!");
+                                            alert.showAndWait();
+                                        }
+
+                                        ins.close();
+                                        con.close();
+                                        conC.closeConnection();
+
+                                        //System.out.println(uname);
+                                    } catch (SQLException e) {
+                                        e.printStackTrace();
+                                    }
+                                    //INSERT INTO RESTAURANTS_BRANCHES (REST_ID, LOCATION_ID, MANAGER_NAME, ADDRESS, CONTACT_NUMBER, OPEN_TIME, CLOSE_TIME, WEEKLY_HOLIDAY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)    
+
+                                }
+                            });
+
+                            primaryStage.setScene(mnscene);

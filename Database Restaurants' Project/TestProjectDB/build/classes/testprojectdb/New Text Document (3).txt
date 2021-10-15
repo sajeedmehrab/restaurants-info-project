@@ -1,0 +1,82 @@
+HomeScene.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+
+ gotoInsertMenu.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(insertMenuScene);
+            }
+        });
+
+
+
+Button backaddoffer_authhome = new Button("Back");
+                RateMN.add(backaddoffer_authhome, 3, 8);
+                backaddoffer_authhome.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        primaryStage.setScene(authorityHome);
+                    }
+                });
+
+                Button logoutaddoffer = new Button("Logout");
+                RateMN.add(logoutaddoffer, 3, 9);
+                logoutaddoffer.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        primaryStage.setScene(loginScene);
+                    }
+                });
+
+
+                    temp.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            System.out.println(temp.getText());
+                            ConnectionClass conC = new ConnectionClass();
+                            Connection con = conC.getConnection();
+                            ObservableList<MenuResults> menu = FXCollections.observableArrayList();
+                            try {
+                                String sql = "SELECT i.item_name, i.item_type, bm.price FROM BRANCH_MENUS bm JOIN RESTAURANTS r using (rest_id) join locations l using (location_id) join menu_items i using (item_id) where r.restaurant_name = ? and l.location_name = ? ";
+                                PreparedStatement pst = con.prepareStatement(sql);
+                                pst.setString(1, temp.getText());
+                                pst.setString(2, SelectedLocTHR);
+                                ResultSet rs = pst.executeQuery();
+                                while (rs.next()) {
+                                    String str1 = rs.getString(1);
+                                    String str2 = rs.getString(2);
+                                    String str3 = Integer.toString(rs.getInt(3));
+                                    menu.add(new MenuResults(str1, str2, str3));
+                                }
+                                pst.close();
+                                con.close();
+                                conC.closeConnection();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+
+                            TableView<MenuResults> menuTable;
+
+                            TableColumn<MenuResults, String> Item_NameColumn = new TableColumn<>("Item_Name");
+                            //rest_nameColumn.setMinWidth(200);
+                            Item_NameColumn.setCellValueFactory(new PropertyValueFactory<>("Item_Name"));
+
+                            TableColumn<MenuResults, String> Item_TypeColumn = new TableColumn<>("Item_Type");
+                            //rest_nameColumn.setMinWidth(200);
+                            Item_TypeColumn.setCellValueFactory(new PropertyValueFactory<>("Item_Type"));
+
+                            TableColumn<MenuResults, String> PriceColumn = new TableColumn<>("Price");
+                            //rest_nameColumn.setMinWidth(200);
+                            PriceColumn.setCellValueFactory(new PropertyValueFactory<>("Price"));
+
+                            menuTable = new TableView<>();
+                            menuTable.setItems(menu);
+                            menuTable.getColumns().addAll(Item_NameColumn, Item_TypeColumn, PriceColumn);
+
+                            VBox vbox = new VBox();
+                            vbox.getChildren().addAll(menuTable);
+
+                            Scene menuScene = new Scene(vbox);
+                            primaryStage.setScene(menuScene);
+
+                        }
+                    });

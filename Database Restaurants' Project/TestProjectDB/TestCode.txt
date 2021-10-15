@@ -1,0 +1,20 @@
+ -- SELECT count(*) from RESTAURANTS;
+/* 
+-- after 3 insertions from outside 
+
+alter sequence rest_id_seq increment by 3;
+
+SELECT rest_id_seq.nextval from dual;
+
+alter sequence rest_id_seq
+increment by 1;
+
+
+*/
+
+-- drop sequence rest_id_seq;
+-- delete from RESTAURANTS;
+
+-- select rest_id_seq.currval from dual;
+ -- insert into RESTAURANTS
+ -- VALUES(rest_id_seq.nextval, 'Chillox');

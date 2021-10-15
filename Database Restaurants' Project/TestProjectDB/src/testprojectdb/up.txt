@@ -1,0 +1,2029 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package testprojectdb;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+
+/**
+ *
+ * @author Hp
+ */
+public class TestProjectDB extends Application {
+
+    String uname;
+
+    @Override
+    public void start(Stage primaryStage) {
+
+        primaryStage.show();
+
+        Scene tobeBuilt;
+        VBox tbbvb = new VBox();
+        Label oops = new Label("Oops! Looks like this page has not been developed yet!");
+        Button backfromtbb = new Button("Back");
+        tbbvb.getChildren().addAll(oops, backfromtbb);
+        tobeBuilt = new Scene(tbbvb, 400, 400);
+
+        Scene loginScene;
+        ChoiceBox usertype = new ChoiceBox();
+        usertype.getItems().addAll("User", "Admin", "Authority");
+        usertype.setValue("User");
+        usertype.setId("usertypecb");
+        TextField usernameli = new TextField();
+        usernameli.setPromptText("Enter Username...");
+        PasswordField passwordli = new PasswordField();
+        passwordli.setPromptText("Enter Password");
+        Button liokButton = new Button("Login");
+        Label suprompt = new Label("Don't have an account? Sign up instead!");
+        suprompt.setId("NormalText");
+        Button toSignup = new Button("Sign Up");
+        Label enterunamelabel = new Label("Enter your username:");
+        enterunamelabel.setId("NormalText");
+        Label loginpasswordlabel = new Label("Enter your Password:");
+        loginpasswordlabel.setId("NormalText");
+        VBox loginLayout = new VBox();
+        loginLayout.getChildren().addAll(usertype, enterunamelabel, usernameli, loginpasswordlabel, passwordli, liokButton, suprompt, toSignup);
+        loginLayout.setAlignment(Pos.CENTER);
+        loginLayout.setSpacing(10);
+        loginLayout.setId("loginLayout");
+        loginScene = new Scene(loginLayout, 500, 500);
+        primaryStage.setScene(loginScene);
+        primaryStage.setTitle("Welcome!");
+
+        loginScene.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+
+        Button logoutloc = new Button("Logout");
+        logoutloc.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+            }
+        });
+
+        //HomeScene
+        Scene HomeScene;
+        GridPane hsGridPane = new GridPane();
+        hsGridPane.setVgap(20);
+        hsGridPane.setHgap(20);
+        HomeScene = new Scene(hsGridPane, 500, 500);
+
+        HomeScene.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+        hsGridPane.setId("homeScene");
+
+        Button PlanMeal = new Button("Plan a Meal!");
+        PlanMeal.setPrefSize(250, 40);
+        hsGridPane.add(PlanMeal, 5, 4);
+        Button ShowRestB = new Button("See All Restaurants!");
+        ShowRestB.setPrefSize(250, 40);
+        hsGridPane.add(ShowRestB, 5, 6);
+        Button RateBranch = new Button("Rate a Branch!");
+        RateBranch.setPrefSize(250, 40);
+        hsGridPane.add(RateBranch, 5, 8);
+        Button RateMeal = new Button("Rate a Meal!");
+        RateMeal.setPrefSize(250, 40);
+        hsGridPane.add(RateMeal, 5, 10);
+        Button ShowOffer = new Button("See Latest Offers!");
+        ShowOffer.setPrefSize(250, 40);
+        hsGridPane.add(ShowOffer, 5, 12);
+
+        PlanMeal.setId("NormalButtonsStyle");
+        ShowRestB.setId("NormalButtonsStyle");
+        RateBranch.setId("NormalButtonsStyle");
+        RateMeal.setId("NormalButtonsStyle");
+        ShowOffer.setId("NormalButtonsStyle");
+
+        Button logouthome = new Button("Logout");
+        logouthome.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+            }
+        });
+
+        hsGridPane.add(logouthome, 6, 13);
+        Scene scene;
+        GridPane root = new GridPane();
+        root.setVgap(10);
+        root.setHgap(10);
+        root.setAlignment(Pos.CENTER);
+        scene = new Scene(root, 500, 500);
+        scene.setFill(Color.BLACK);
+
+        root.setId("PlanMealBackground");
+        scene.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+
+        ChoiceBox cb = new ChoiceBox();
+        cb.setId("NormalButtonsStyle");
+
+        ConnectionClass conC = new ConnectionClass();
+        Connection con = conC.getConnection();
+        List listlocs = new ArrayList();
+        try {
+
+            String sql = "SELECT LOCATION_NAME FROM LOCATIONS";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                listlocs.add(rs.getString(1));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+            //System.out.println(uname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        cb.getItems().addAll(listlocs);
+        cb.getItems().add("Anywhere Will Do!");
+        cb.setValue("Anywhere Will Do!");
+        //cb.setValue(listlocs.get(0));
+        cb.setPrefSize(250, 40);
+        root.add(cb, 1, 2);
+
+        Label selectLocationprompt = new Label("Where do you want to eat?");
+        selectLocationprompt.setId("NormalText");
+        root.add(selectLocationprompt, 1, 0);
+        ChoiceBox cb2 = new ChoiceBox();
+        cb2.setId("NormalButtonsStyle");
+
+        conC = new ConnectionClass();
+        con = conC.getConnection();
+        List listitems = new ArrayList();
+        try {
+
+            String sql = "SELECT DISTINCT ITEM_TYPE FROM MENU_ITEMS";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                listitems.add(rs.getString(1));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+            //System.out.println(uname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        cb2.getItems().addAll(listitems);
+        //cb2.setValue(listitems.get(0));
+        cb2.getItems().add("Anything Will Do!");
+        cb2.setValue("Anything Will Do!");
+        cb2.setPrefSize(250, 40);
+        root.add(cb2, 1, 4);
+
+        Label selectFoodprompt = new Label("What do you want to eat?");
+        selectFoodprompt.setId("NormalText");
+        root.add(selectFoodprompt, 1, 3);
+
+        TextField pricePlan = new TextField();
+        pricePlan.setPrefSize(250, 40);
+        pricePlan.setId("NormalButtonsStyle");
+        root.add(pricePlan, 1, 6);
+
+        Label WritePriceprompt = new Label("What is your highest budget?");
+        WritePriceprompt.setId("NormalText");
+        root.add(WritePriceprompt, 1, 5);
+
+        Button backtoHomeScene = new Button("Back");
+        backtoHomeScene.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(HomeScene);
+            }
+        });
+        root.add(backtoHomeScene, 2, 12);
+
+        Button b2 = new Button("All Set!");
+        b2.setPrefSize(100, 40);
+        root.add(b2, 2, 6);
+
+        b2.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+
+                int budget = 0;
+                if (pricePlan.getText() == null || pricePlan.getText().trim().isEmpty()) {
+                    budget = 99999;
+                } else {
+                    budget = Integer.parseInt(pricePlan.getText());
+                }
+
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+                ObservableList<Result> results = FXCollections.observableArrayList();
+
+                try {
+                    ///insert query here
+                    //String sql = "select r.RESTAURANT_NAME, rb.ADDRESS, mi.ITEM_NAME, bm.PRICE, bm.OFFER from BRANCH_MENUS bm join restaurants r using(rest_id) join locations l using(location_id) join MENU_ITEMS mi using(item_id) join RESTAURANTS_BRANCHES rb using(rest_id, location_id) where l.LOCATION_NAME = ? AND mi.ITEM_TYPE = ? AND bm.PRICE <= ?";
+                    String sql;
+                    PreparedStatement pst = null;
+                    if ((String) cb.getValue() != "Anywhere Will Do!" && (String) cb2.getValue() != "Anything Will Do!") {
+                        sql = "select r.RESTAURANT_NAME, rb.ADDRESS, i.ITEM_NAME, bm.PRICE, bm.OFFER, GET_BRANCHMENU_AVGRATING(r.RESTAURANT_NAME, l.LOCATION_NAME, i.ITEM_ID) from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (l.LOCATION_ID = bm.LOCATION_ID) join MENU_ITEMS i on (i.ITEM_ID = bm.ITEM_ID) join RESTAURANTS_BRANCHES rb on (bm.REST_ID = rb.REST_ID and bm.LOCATION_ID = rb.LOCATION_ID) where l.LOCATION_NAME = ? AND i.ITEM_TYPE = ? AND bm.PRICE <= ?";
+                        pst = con.prepareStatement(sql);
+                        pst.setString(1, (String) cb.getValue());
+                        pst.setString(2, (String) cb2.getValue());
+                        pst.setInt(3, budget);
+                    } else if ((String) cb.getValue() != "Anywhere Will Do!" && (String) cb2.getValue() == "Anything Will Do!") {
+                        sql = "select r.RESTAURANT_NAME, rb.ADDRESS, i.ITEM_NAME, bm.PRICE, bm.OFFER, GET_BRANCHMENU_AVGRATING(r.RESTAURANT_NAME, l.LOCATION_NAME, i.ITEM_ID) from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (l.LOCATION_ID = bm.LOCATION_ID) join MENU_ITEMS i on (i.ITEM_ID = bm.ITEM_ID) join RESTAURANTS_BRANCHES rb on (bm.REST_ID = rb.REST_ID and bm.LOCATION_ID = rb.LOCATION_ID) where l.LOCATION_NAME = ? AND bm.PRICE <= ?";
+                        pst = con.prepareStatement(sql);
+                        pst.setString(1, (String) cb.getValue());
+                        pst.setInt(2, budget);
+                    } else if ((String) cb.getValue() == "Anywhere Will Do!" && (String) cb2.getValue() != "Anything Will Do!") {
+                        sql = "select r.RESTAURANT_NAME, rb.ADDRESS, i.ITEM_NAME, bm.PRICE, bm.OFFER, GET_BRANCHMENU_AVGRATING(r.RESTAURANT_NAME, l.LOCATION_NAME, i.ITEM_ID) from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (l.LOCATION_ID = bm.LOCATION_ID) join MENU_ITEMS i on (i.ITEM_ID = bm.ITEM_ID) join RESTAURANTS_BRANCHES rb on (bm.REST_ID = rb.REST_ID and bm.LOCATION_ID = rb.LOCATION_ID)  where i.ITEM_TYPE = ? AND bm.PRICE <= ?";
+                        pst = con.prepareStatement(sql);
+                        pst.setString(1, (String) cb2.getValue());
+                        pst.setInt(2, budget);
+                    } else if ((String) cb.getValue() == "Anywhere Will Do!" && (String) cb2.getValue() == "Anything Will Do!") {
+                        sql = "select r.RESTAURANT_NAME, rb.ADDRESS, i.ITEM_NAME, bm.PRICE, bm.OFFER, GET_BRANCHMENU_AVGRATING(r.RESTAURANT_NAME, l.LOCATION_NAME, i.ITEM_ID) from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (l.LOCATION_ID = bm.LOCATION_ID) join MENU_ITEMS i on (i.ITEM_ID = bm.ITEM_ID) join RESTAURANTS_BRANCHES rb on (bm.REST_ID = rb.REST_ID and bm.LOCATION_ID = rb.LOCATION_ID)  where bm.PRICE <= ?";
+                        pst = con.prepareStatement(sql);
+                        pst.setInt(1, budget);
+                    }
+
+                    if (pst == null) {
+                        System.out.println("Genjam lagse");
+                    }
+                    ResultSet rs = pst.executeQuery();
+
+                    while (rs.next()) {
+
+                        /*System.out.print(rs.getString(1)+ " ") ;
+                                System.out.print(rs.getString(2)+ " ") ;
+                                System.out.print(rs.getString(3)+ " ") ;
+                                System.out.print(rs.getInt(4)+ " ") ;
+                                System.out.print(rs.getString(5)+ " ") ;
+                                System.out.println("");*/
+                        String str1 = rs.getString(1);
+                        String str2 = rs.getString(2);
+                        String str3 = rs.getString(3);
+                        String str4 = Integer.toString(rs.getInt(4));
+                        String str5 = rs.getString(5);
+                        String str6 = Double.toString(rs.getDouble(6));
+
+                        results.add(new Result(str1, str2, str3, str4, str5, str6));
+
+                    }
+
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                } catch (SQLException e) {
+                    System.out.println("Check it from console");
+                    e.printStackTrace();
+                }
+
+                TableView<Result> table;
+                primaryStage.setTitle("Results");
+
+                TableColumn<Result, String> rest_nameColumn = new TableColumn<>("Restaurant_Name");
+                rest_nameColumn.setMinWidth(200);
+                rest_nameColumn.setCellValueFactory(new PropertyValueFactory<>("Restaurant_Name"));
+
+                TableColumn<Result, String> AddressColumn = new TableColumn<>("Address");
+                AddressColumn.setMinWidth(200);
+                AddressColumn.setCellValueFactory(new PropertyValueFactory<>("Address"));
+
+                TableColumn<Result, String> Item_NameColumn = new TableColumn<>("Item_Name");
+                Item_NameColumn.setMinWidth(200);
+                Item_NameColumn.setCellValueFactory(new PropertyValueFactory<>("Item_Name"));
+
+                TableColumn<Result, String> PriceColumn = new TableColumn<>("Price");
+                PriceColumn.setMinWidth(100);
+                PriceColumn.setCellValueFactory(new PropertyValueFactory<>("Price"));
+
+                TableColumn<Result, String> OfferColumn = new TableColumn<>("Offer");
+                OfferColumn.setMinWidth(200);
+                OfferColumn.setCellValueFactory(new PropertyValueFactory<>("Offer"));
+
+                TableColumn<Result, String> RatingColumn = new TableColumn<>("Rating");
+                RatingColumn.setMinWidth(200);
+                RatingColumn.setCellValueFactory(new PropertyValueFactory<>("Rating"));
+
+                table = new TableView<>();
+                table.setItems(results);
+                table.getColumns().addAll(rest_nameColumn, AddressColumn, Item_NameColumn, PriceColumn, OfferColumn, RatingColumn);
+
+                Button logoutres = new Button("LOGOUTRES");
+                logoutres.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        primaryStage.setScene(loginScene);
+                    }
+                });
+
+                Button goBackToPlanning = new Button("Back to Planning");
+                goBackToPlanning.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        primaryStage.setScene(scene);
+                    }
+                });
+
+                VBox vbox = new VBox();
+                vbox.getChildren().addAll(table, logoutres, goBackToPlanning);
+                vbox.setAlignment(Pos.CENTER);
+                vbox.setId("vboxBackground");
+                Scene resultScene = new Scene(vbox);
+
+                resultScene.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+
+                primaryStage.setScene(resultScene);
+                primaryStage.show();
+            }
+        });
+
+        root.add(logoutloc, 2, 10);
+        /// Rate Menu , do css
+        Scene menratscene;
+
+        GridPane RateMN = new GridPane();
+        RateMN.setVgap(20);
+        RateMN.setHgap(20);
+        ChoiceBox MNRlocations = new ChoiceBox();
+        conC = new ConnectionClass();
+        con = conC.getConnection();
+        List MNRlistlocs = new ArrayList();
+        try {
+
+            String sql = "SELECT LOCATION_NAME FROM LOCATIONS";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                MNRlistlocs.add(rs.getString(1));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+            //System.out.println(uname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        MNRlocations.getItems().addAll(MNRlistlocs);
+        MNRlocations.setValue(MNRlistlocs.get(0));
+        MNRlocations.setPrefSize(250, 40);
+
+        Button MNRok = new Button("Select");
+        RateMN.add(MNRlocations, 2, 4);
+        RateMN.add(MNRok, 5, 4);
+        menratscene = new Scene(RateMN, 500, 500);
+
+        MNRok.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String MNSelectedLocTHR = (String) MNRlocations.getValue();
+
+                Scene MNRestaurantsRes;
+                GridPane MNShowRestGP = new GridPane();
+                MNShowRestGP.setVgap(1);
+                MNShowRestGP.setHgap(20);
+
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+                List mnlistofrests = new ArrayList();
+                int mnno_of_rests = 0;
+                try {
+
+                    String sql = "select distinct(r.restaurant_name) from branch_menus rb join restaurants r using (rest_id) join locations l using (location_id) where l.location_name = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, MNSelectedLocTHR);
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        mnlistofrests.add(rs.getString(1));
+                        mnno_of_rests++;
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+                    System.out.println(mnno_of_rests);
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(mnno_of_rests);
+
+                //System.out.println(listofrests.get(1));
+                for (int i = 0; i < mnno_of_rests; i++) {
+                    Button mntemp = new Button((String) mnlistofrests.get(i));
+                    mntemp.setPrefSize(400, 90);
+                    System.out.println(mntemp.getText());
+
+                    mntemp.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            //System.out.println(rbtemp.getText());
+                            String MNSelectedResTHR = mntemp.getText();
+                            System.out.println(MNSelectedResTHR);
+                            Scene s;
+
+                            GridPane RMN = new GridPane();
+                            RMN.setVgap(20);
+                            RMN.setHgap(20);
+                            ChoiceBox MNRit = new ChoiceBox();
+                            ConnectionClass conC = new ConnectionClass();
+                            Connection con = conC.getConnection();
+                            List MNRlistits = new ArrayList();
+
+                            System.out.println(MNSelectedLocTHR);
+                            System.out.println(MNSelectedResTHR);
+                            try {
+
+                                String sql = "select DISTINCT (i.ITEM_TYPE) from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (l.LOCATION_ID = bm.LOCATION_ID) join MENU_ITEMS i on (i.ITEM_ID = bm.ITEM_ID) where r.RESTAURANT_NAME = ? AND l.LOCATION_NAME = ?";
+                                PreparedStatement pst = con.prepareStatement(sql);
+                                pst.setString(1, MNSelectedResTHR);
+                                pst.setString(2, MNSelectedLocTHR);
+
+                                ResultSet rs = pst.executeQuery();
+                                while (rs.next()) {
+                                    MNRlistits.add(rs.getString(1));
+                                }
+                                pst.close();
+                                con.close();
+                                conC.closeConnection();
+
+                                //System.out.println(uname);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                            MNRit.getItems().addAll(MNRlistits);
+                            MNRit.setValue(MNRlistits.get(0));
+                            MNRit.setPrefSize(250, 40);
+
+                            Button ok = new Button("Select");
+                            RMN.add(MNRit, 2, 4);
+                            RMN.add(ok, 5, 4);
+
+                            ok.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override
+                                public void handle(ActionEvent event) {
+                                    String MNSelectedItT = (String) MNRit.getValue();
+                                    //System.out.println(MNSelectedItT);
+
+                                    Scene mnscene;
+                                    GridPane mnroot = new GridPane();
+                                    mnroot.setVgap(20);
+                                    mnroot.setHgap(20);
+                                    mnroot.setAlignment(Pos.CENTER);
+                                    mnscene = new Scene(mnroot, 500, 500);
+                                    mnscene.setFill(Color.BLACK);
+
+                                    ChoiceBox mnRit = new ChoiceBox();
+                                    ConnectionClass conC = new ConnectionClass();
+                                    Connection con = conC.getConnection();
+                                    List mnRlistits = new ArrayList();
+
+                                    //System.out.println(MNSelectedLocTHR);
+                                    //System.out.println(MNSelectedResTHR);
+                                    try {
+
+                                        String sql = "select DISTINCT (i.ITEM_NAME) from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (l.LOCATION_ID = bm.LOCATION_ID) join MENU_ITEMS i on (i.ITEM_ID = bm.ITEM_ID) where r.RESTAURANT_NAME = ? AND l.LOCATION_NAME = ? and i.ITEM_TYPE = ?";
+                                        PreparedStatement pst = con.prepareStatement(sql);
+                                        pst.setString(1, MNSelectedResTHR);
+                                        pst.setString(2, MNSelectedLocTHR);
+                                        pst.setString(3, MNSelectedItT);
+
+                                        ResultSet rs = pst.executeQuery();
+                                        while (rs.next()) {
+                                            mnRlistits.add(rs.getString(1));
+                                        }
+                                        pst.close();
+                                        con.close();
+                                        conC.closeConnection();
+
+                                        //System.out.println(uname);
+                                    } catch (SQLException e) {
+                                        e.printStackTrace();
+                                    }
+                                    mnRit.getItems().addAll(mnRlistits);
+                                    mnRit.setValue(mnRlistits.get(0));
+                                    mnRit.setPrefSize(250, 40);
+                                    mnroot.add(mnRit, 1, 1);
+
+                                    TextField mnating = new TextField();
+                                    mnating.setPrefSize(250, 40);
+                                    mnating.setPromptText("Enter Rating");
+                                    mnroot.add(mnating, 1, 3);
+
+                                    TextField mnc = new TextField();
+                                    mnc.setPrefSize(250, 40);
+                                    mnc.setPromptText("Enter Comment");
+                                    mnroot.add(mnc, 1, 5);
+
+                                    Button mnok = new Button("Enter");
+                                    mnroot.add(mnok, 5, 4);
+
+                                    mnok.setOnAction(new EventHandler<ActionEvent>() {
+                                        @Override
+                                        public void handle(ActionEvent event) {
+                                            String MNSelectedItN = (String) mnRit.getValue();
+                                            //System.out.println(MNSelectedItN);
+                                            ConnectionClass conC = new ConnectionClass();
+                                            Connection con = conC.getConnection();
+                                            try {
+
+                                                CallableStatement ins = con.prepareCall("{?= call SET_BRANCHMENU_RATING(?,?,?,?,?,?,?)}");
+
+                                                ins.setString(2, MNSelectedResTHR);
+                                                ins.setString(3, MNSelectedLocTHR);
+                                                ins.setString(4, MNSelectedItT);
+                                                ins.setString(5, MNSelectedItN);
+                                                ins.setString(6, uname);
+                                                ins.setDouble(7, Double.parseDouble(mnating.getText()));
+                                                ins.setString(8, mnc.getText());
+                                                ins.registerOutParameter(1, Types.INTEGER);
+                                                ins.execute();
+                                                System.out.println(ins.getInt(1));
+
+                                                if (ins.getInt(1) != 1) {
+                                                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                                                    alert.setTitle("Insert Error");
+                                                    alert.setHeaderText("Insert Error");
+                                                    alert.setContentText("Make sure the branch is not already rated!");
+                                                    alert.showAndWait();
+                                                }
+
+                                                ins.close();
+                                                con.close();
+                                                conC.closeConnection();
+
+                                                //System.out.println(uname);
+                                            } catch (SQLException e) {
+                                                e.printStackTrace();
+                                            }
+                                            //INSERT INTO RESTAURANTS_BRANCHES (REST_ID, LOCATION_ID, MANAGER_NAME, ADDRESS, CONTACT_NUMBER, OPEN_TIME, CLOSE_TIME, WEEKLY_HOLIDAY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)    
+                                            primaryStage.setScene(HomeScene);
+
+                                        }
+                                    });
+
+                                    primaryStage.setScene(mnscene);
+
+                                }
+                            });
+
+                            s = new Scene(RMN, 500, 500);
+                            primaryStage.setScene(s);
+
+                        }
+                    });
+
+                    MNShowRestGP.add(mntemp, 0, i + 30);
+                }
+                ScrollPane MNShowRestSp = new ScrollPane();
+                MNShowRestSp.setContent(MNShowRestGP);
+                MNRestaurantsRes = new Scene(MNShowRestSp, 400, 400);
+
+                primaryStage.setScene(MNRestaurantsRes);
+            }
+        });
+
+        /// Rate Branch
+        Scene bratscene;
+
+        GridPane RateBR = new GridPane();
+        RateBR.setVgap(20);
+        RateBR.setHgap(20);
+        ChoiceBox RBRlocations = new ChoiceBox();
+        conC = new ConnectionClass();
+        con = conC.getConnection();
+        List RBRlistlocs = new ArrayList();
+        try {
+
+            String sql = "SELECT LOCATION_NAME FROM LOCATIONS";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                RBRlistlocs.add(rs.getString(1));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+            //System.out.println(uname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        RBRlocations.getItems().addAll(RBRlistlocs);
+        RBRlocations.setValue(RBRlistlocs.get(0));
+        RBRlocations.setPrefSize(250, 40);
+
+        Button RBRok = new Button("Select");
+        RateBR.add(RBRlocations, 2, 4);
+        RateBR.add(RBRok, 5, 4);
+        bratscene = new Scene(RateBR, 500, 500);
+
+        RBRok.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String RBSelectedLocTHR = (String) RBRlocations.getValue();
+
+                Scene RBRestaurantsRes;
+                GridPane RBShowRestGP = new GridPane();
+                RBShowRestGP.setVgap(1);
+                RBShowRestGP.setHgap(20);
+
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+                List rblistofrests = new ArrayList();
+                int rbno_of_rests = 0;
+                try {
+
+                    String sql = "select r.restaurant_name from restaurants_branches rb join restaurants r using (rest_id) join locations l using (location_id) where l.location_name = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, RBSelectedLocTHR);
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        rblistofrests.add(rs.getString(1));
+                        rbno_of_rests++;
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+                    System.out.println(rbno_of_rests);
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(rbno_of_rests);
+
+                //System.out.println(listofrests.get(1));
+                for (int i = 0; i < rbno_of_rests; i++) {
+                    Button rbtemp = new Button((String) rblistofrests.get(i));
+                    rbtemp.setPrefSize(400, 90);
+                    System.out.println(rbtemp.getText());
+
+                    rbtemp.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            //System.out.println(rbtemp.getText());
+                            String RBSelectedResTHR = rbtemp.getText();
+                            //System.out.println(RBSelectedResTHR);
+                            Scene rbscene;
+                            GridPane rbroot = new GridPane();
+                            rbroot.setVgap(20);
+                            rbroot.setHgap(20);
+                            rbroot.setAlignment(Pos.CENTER);
+                            rbscene = new Scene(rbroot, 500, 500);
+                            rbscene.setFill(Color.BLACK);
+
+                            TextField brating = new TextField();
+                            brating.setPrefSize(250, 40);
+                            brating.setPromptText("Enter Rating");
+                            rbroot.add(brating, 1, 3);
+
+                            TextField brc = new TextField();
+                            brc.setPrefSize(250, 40);
+                            brc.setPromptText("Enter Comment");
+                            rbroot.add(brc, 1, 5);
+
+                            Button rbok = new Button("Enter");
+                            rbroot.add(rbok, 5, 4);
+
+                            rbok.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override
+                                public void handle(ActionEvent event) {
+                                    ConnectionClass conC = new ConnectionClass();
+                                    Connection con = conC.getConnection();
+                                    try {
+
+                                        CallableStatement ins = con.prepareCall("{?= call SET_BRANCH_RATING(?,?,?,?,?)}");
+
+                                        ins.setString(2, RBSelectedResTHR);
+                                        ins.setString(3, RBSelectedLocTHR);
+                                        ins.setString(4, usernameli.getText());
+                                        ins.setDouble(5, Double.parseDouble(brating.getText()));
+                                        ins.setString(6, brc.getText());
+                                        ins.registerOutParameter(1, Types.INTEGER);
+                                        ins.execute();
+                                        System.out.println(ins.getInt(1));
+
+                                        if (ins.getInt(1) != 1) {
+                                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                                            alert.setTitle("Insert Error");
+                                            alert.setHeaderText("Insert Error");
+                                            alert.setContentText("Make sure the branch is not already rated!");
+                                            alert.showAndWait();
+                                        }
+
+                                        ins.close();
+                                        con.close();
+                                        conC.closeConnection();
+
+                                        //System.out.println(uname);
+                                    } catch (SQLException e) {
+                                        e.printStackTrace();
+                                    }
+                                    //INSERT INTO RESTAURANTS_BRANCHES (REST_ID, LOCATION_ID, MANAGER_NAME, ADDRESS, CONTACT_NUMBER, OPEN_TIME, CLOSE_TIME, WEEKLY_HOLIDAY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)    
+                                    primaryStage.setScene(HomeScene);
+
+                                }
+                            });
+
+                            primaryStage.setScene(rbscene);
+
+                        }
+                    });
+
+                    RBShowRestGP.add(rbtemp, 0, i + 30);
+                }
+                ScrollPane RBShowRestSp = new ScrollPane();
+                RBShowRestSp.setContent(RBShowRestGP);
+                RBRestaurantsRes = new Scene(RBShowRestSp, 400, 400);
+
+                primaryStage.setScene(RBRestaurantsRes);
+            }
+        });
+
+        // do css end
+        /// All restaurants Scene
+        Scene TransHomeRest;
+
+        VBox TransHomeRestVB = new VBox();
+        TransHomeRestVB.setId("TransHomeRest");
+        TransHomeRestVB.setAlignment(Pos.CENTER);
+        TransHomeRestVB.setSpacing(30);
+
+        ChoiceBox THRlocations = new ChoiceBox();
+        conC = new ConnectionClass();
+        con = conC.getConnection();
+        List THRlistlocs = new ArrayList();
+        try {
+
+            String sql = "SELECT LOCATION_NAME FROM LOCATIONS";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                THRlistlocs.add(rs.getString(1));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+            //System.out.println(uname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Text thrtext = new Text("Select Area!");
+        thrtext.setFont(Font.font("Verdana", 30));
+
+        THRlocations.getItems().addAll(THRlistlocs);
+        THRlocations.setValue(THRlistlocs.get(0));
+        THRlocations.setPrefSize(250, 40);
+        THRlocations.setId("NormalButtonsStyle");
+
+        Button THRok = new Button("Select");
+
+        Button THRBack = new Button("Back");
+        THRBack.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(HomeScene);
+            }
+        });
+
+        TransHomeRestVB.getChildren().addAll(thrtext, THRlocations, THRok, THRBack);
+        TransHomeRest = new Scene(TransHomeRestVB, 500, 500);
+        TransHomeRest.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+        //END OF TRANS HOME REST SCENE
+
+        THRok.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String SelectedLocTHR = (String) THRlocations.getValue();
+
+                Scene RestaurantsRes;
+                GridPane ShowRestGP = new GridPane();
+                ShowRestGP.setVgap(1);
+                ShowRestGP.setHgap(20);
+                
+                Button BackRestaurantsRes = new Button("Back");
+
+                BackRestaurantsRes.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        primaryStage.setScene(TransHomeRest);
+
+                    }
+                });
+
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+                List listofrests = new ArrayList();
+                int no_of_rests = 0;
+                try {
+
+                    String sql = "select r.restaurant_name from restaurants_branches rb join restaurants r using (rest_id) join locations l using (location_id) where l.location_name = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, SelectedLocTHR);
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        listofrests.add(rs.getString(1));
+                        no_of_rests++;
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+                    System.out.println(no_of_rests);
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(no_of_rests);
+
+                //System.out.println(listofrests.get(1));
+                for (int i = 0; i < no_of_rests; i++) {
+                    Button temp = new Button((String) listofrests.get(i));
+                    temp.setPrefSize(500, 90);
+                    temp.setId("temp");
+                    System.out.println(temp.getText());
+
+                    temp.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            
+                            Scene Restaurantprofile;
+                            VBox RestProfVB = new VBox();
+                            RestProfVB.setAlignment(Pos.CENTER);
+                            RestProfVB.setSpacing(20);
+
+                            ConnectionClass conC = new ConnectionClass();
+                            Connection con = conC.getConnection();
+                            String rest_name = null;
+                            String manager_name = null;
+                            String address = null;
+                            String contact_no = null;
+                            String open_time = null;
+                            String close_time = null;
+                            String weekly_holiday = null;
+
+                            try {
+
+                                String sql = "select r.restaurant_name, rb.manager_name, rb.address, rb.contact_number, rb.open_time, rb.close_time, rb.weekly_holiday from restaurants_branches rb join restaurants r using (rest_id) join locations l using (location_id) where l.location_name = ? and r.restaurant_name = ?";
+                                PreparedStatement pst = con.prepareStatement(sql);
+                                pst.setString(1, SelectedLocTHR);
+                                pst.setString(2, temp.getText());
+                                ResultSet rs = pst.executeQuery();
+                                //String rest_name, manager_name, address, contact_no, open_time, close_time, weekly_holiday;
+
+                                while (rs.next()) {
+                                    rest_name = rs.getString(1);
+                                    manager_name = rs.getString(2);
+                                    address = rs.getString(3);
+                                    contact_no = rs.getString(4);
+                                    open_time = rs.getString(5);
+                                    close_time = rs.getString(6);
+                                    weekly_holiday = rs.getString(7);
+                                }
+                                pst.close();
+                                con.close();
+                                conC.closeConnection();
+                                System.out.println(rest_name + manager_name + address + contact_no + open_time + close_time + weekly_holiday);
+
+                                //System.out.println(uname);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+
+                            Text restnametext = new Text("Restaurant Name: " + rest_name);
+                            Text mangrnametext = new Text("Manager: " + manager_name);
+                            Text addresstext = new Text("Address in " + SelectedLocTHR + ": " + address);
+                            Text contact_notext = new Text("Contact Number: " + contact_no);
+                            Text opentimetext = new Text(temp.getText() + " opens at " + open_time + " and closes at " + close_time);
+                            Text weekly_holidaytext = new Text("Weekly off days " + weekly_holiday);
+                            Button backtorestlistselect = new Button("Back");
+
+                            backtorestlistselect.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override
+                                public void handle(ActionEvent event) {
+                                    primaryStage.setScene(TransHomeRest);
+                                }
+                            });
+
+                            Button showMenu = new Button("Show Menu");
+                            showMenu.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override
+                                public void handle(ActionEvent event) {
+                                    ConnectionClass conC = new ConnectionClass();
+                                    Connection con = conC.getConnection();
+                                    ObservableList<MenuResults> menu = FXCollections.observableArrayList();
+                                    try {
+                                        String sql = "SELECT i.item_name, i.item_type, bm.price FROM BRANCH_MENUS bm JOIN RESTAURANTS r using (rest_id) join locations l using (location_id) join menu_items i using (item_id) where r.restaurant_name = ? and l.location_name = ? ";
+                                        PreparedStatement pst = con.prepareStatement(sql);
+                                        pst.setString(1, temp.getText());
+                                        pst.setString(2, SelectedLocTHR);
+                                        ResultSet rs = pst.executeQuery();
+                                        while (rs.next()) {
+                                            String str1 = rs.getString(1);
+                                            String str2 = rs.getString(2);
+                                            String str3 = Integer.toString(rs.getInt(3));
+                                            menu.add(new MenuResults(str1, str2, str3));
+                                        }
+                                        pst.close();
+                                        con.close();
+                                        conC.closeConnection();
+                                    } catch (SQLException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    TableView<MenuResults> menuTable;
+
+                                    TableColumn<MenuResults, String> Item_NameColumn = new TableColumn<>("Item_Name");
+                                    Item_NameColumn.setMinWidth(200);
+                                    Item_NameColumn.setCellValueFactory(new PropertyValueFactory<>("Item_Name"));
+
+                                    TableColumn<MenuResults, String> Item_TypeColumn = new TableColumn<>("Item_Type");
+                                    Item_TypeColumn.setMinWidth(200);
+                                    Item_TypeColumn.setCellValueFactory(new PropertyValueFactory<>("Item_Type"));
+
+                                    TableColumn<MenuResults, String> PriceColumn = new TableColumn<>("Price");
+                                    PriceColumn.setMinWidth(200);
+                                    PriceColumn.setCellValueFactory(new PropertyValueFactory<>("Price"));
+
+                                    menuTable = new TableView<>();
+                                    menuTable.setItems(menu);
+                                    menuTable.getColumns().addAll(Item_NameColumn, Item_TypeColumn, PriceColumn);
+                                    Button backtoShowRest = new Button("Back");
+                                    backtoShowRest.setOnAction(new EventHandler<ActionEvent>() {
+                                        @Override
+                                        public void handle(ActionEvent event) {
+                                            primaryStage.setScene(TransHomeRest);
+                                        }
+                                    });
+                                    VBox vbox = new VBox();
+                                    vbox.setAlignment(Pos.CENTER);
+
+                                    vbox.getChildren().addAll(menuTable, backtoShowRest);
+
+                                    Scene menuScene = new Scene(vbox);
+                                    menuScene.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+                                    primaryStage.setScene(menuScene);
+                                }
+                            });
+
+                            RestProfVB.getChildren().addAll(restnametext, mangrnametext, addresstext, contact_notext, opentimetext, weekly_holidaytext, showMenu, backtorestlistselect);
+                            RestProfVB.setId("RestProfVB");
+                            Restaurantprofile = new Scene(RestProfVB, 500, 500);
+                            
+                            Restaurantprofile.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+                            primaryStage.setScene(Restaurantprofile);
+                            
+
+                        }
+                    });
+
+                    ShowRestGP.add(temp, 0, i + 30);
+                }
+                ShowRestGP.add(BackRestaurantsRes, 0, 0);
+                ShowRestGP.setId("ShowRestBackground");
+                ScrollPane ShowRestSp = new ScrollPane();
+                ShowRestSp.setContent(ShowRestGP);
+                ShowRestSp.setId("ShowRestBackground");
+                RestaurantsRes = new Scene(ShowRestSp, 500, 500);
+                RestaurantsRes.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+                primaryStage.setScene(RestaurantsRes);
+            }
+        });
+
+        ///End of restaurants Scene
+        ///START OF OFFERS SCENE
+        conC = new ConnectionClass();
+        con = conC.getConnection();
+        ObservableList<Result> offersos = FXCollections.observableArrayList();
+        try {
+            String sql = "select r.RESTAURANT_NAME, rb.ADDRESS, i.ITEM_NAME, bm.PRICE, bm.OFFER, GET_BRANCHMENU_AVGRATING(r.RESTAURANT_NAME, l.LOCATION_NAME, i.ITEM_ID) from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (l.LOCATION_ID = bm.LOCATION_ID) join MENU_ITEMS i on (i.ITEM_ID = bm.ITEM_ID) join RESTAURANTS_BRANCHES rb on (bm.REST_ID = rb.REST_ID and bm.LOCATION_ID = rb.LOCATION_ID) WHERE bm.OFFER <> 'NO OFFER' and bm.OFFER is not null";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                String str1 = rs.getString(1);
+                String str2 = rs.getString(2);
+                String str3 = rs.getString(3);
+                String str4 = Integer.toString(rs.getInt(4));
+                String str5 = rs.getString(5);
+                String str6 = Double.toString(rs.getDouble(6));
+                offersos.add(new Result(str1, str2, str3, str4, str5, str6));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        TableView<Result> Offertable;
+        //primaryStage.setTitle("Offer Results");
+
+        TableColumn<Result, String> rest_nameColumn = new TableColumn<>("Restaurant_Name");
+        rest_nameColumn.setMinWidth(200);
+        rest_nameColumn.setCellValueFactory(new PropertyValueFactory<>("Restaurant_Name"));
+
+        TableColumn<Result, String> AddressColumn = new TableColumn<>("Address");
+        AddressColumn.setMinWidth(200);
+        AddressColumn.setCellValueFactory(new PropertyValueFactory<>("Address"));
+
+        TableColumn<Result, String> Item_NameColumn = new TableColumn<>("Item_Name");
+        Item_NameColumn.setMinWidth(200);
+        Item_NameColumn.setCellValueFactory(new PropertyValueFactory<>("Item_Name"));
+
+        TableColumn<Result, String> PriceColumn = new TableColumn<>("Price");
+        PriceColumn.setMinWidth(100);
+        PriceColumn.setCellValueFactory(new PropertyValueFactory<>("Price"));
+
+        TableColumn<Result, String> OfferColumn = new TableColumn<>("Offer");
+        OfferColumn.setMinWidth(200);
+        OfferColumn.setCellValueFactory(new PropertyValueFactory<>("Offer"));
+
+        TableColumn<Result, String> RatingColumn = new TableColumn<>("Rating");
+        RatingColumn.setMinWidth(200);
+        RatingColumn.setCellValueFactory(new PropertyValueFactory<>("Rating"));
+        Offertable = new TableView<>();
+        Offertable.setItems(offersos);
+        Offertable.getColumns().addAll(rest_nameColumn, AddressColumn, Item_NameColumn, PriceColumn, OfferColumn, RatingColumn);
+
+        Button goBack_ShowOffer_home = new Button("Back");
+        goBack_ShowOffer_home.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(HomeScene);
+            }
+        });
+
+        VBox offervbox = new VBox();
+        offervbox.getChildren().addAll(goBack_ShowOffer_home, Offertable);
+        offervbox.setAlignment(Pos.CENTER);
+        offervbox.setId("offervboxbackground");
+        Scene offerScene = new Scene(offervbox, 500, 500);
+        offerScene.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+
+        ///END OF OFFERS SCENE
+        PlanMeal.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(scene);
+            }
+        });
+
+        ShowRestB.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(TransHomeRest);
+            }
+        });
+
+        RateBranch.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(bratscene);
+            }
+        });
+
+        RateMeal.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(menratscene);
+            }
+        });
+
+        ShowOffer.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(offerScene);
+            }
+        });
+
+        Scene signupScene;
+        TextField usernameInput = new TextField();
+        usernameInput.setPromptText("Insert User Name...");
+        TextField FirstNameInput = new TextField();
+        FirstNameInput.setPromptText("Insert First Name...");
+        TextField LastNameInput = new TextField();
+        LastNameInput.setPromptText("Insert Last Name...");
+        TextField emailInput = new TextField();
+        emailInput.setPromptText("Insert email...");
+        TextField PhoneInput = new TextField();
+        PhoneInput.setPromptText("Insert Phone Number...");
+        TextField GenderInput = new TextField();
+        GenderInput.setPromptText("Insert Gender... Male/Female");
+        PasswordField pb = new PasswordField();
+        pb.setPromptText("Set a Password");
+        Button suokButton = new Button("Ok");
+        ChoiceBox genderbox = new ChoiceBox();
+        genderbox.getItems().addAll("Male", "Female");
+        genderbox.setValue("Female");
+        Label liprompt = new Label("Already have an account? Login instead!");
+        Button toli = new Button("Login");
+        VBox loginLay = new VBox();
+        loginLay.getChildren().addAll(usernameInput, FirstNameInput, LastNameInput, emailInput, PhoneInput, genderbox, pb, suokButton, liprompt, toli);
+        signupScene = new Scene(loginLay, 400, 400);
+         signupScene.getStylesheets().add(TestProjectDB.class.getResource("CSSButtons1.css").toExternalForm());
+
+        //Start of Admin
+        Scene adminHome;
+        VBox admhomevb = new VBox();
+        Label greetadm = new Label("Welcome Admin!");
+        Label admOptions = new Label("Insert a restaurant. Press on the button below to insert a menu item!");
+        Button addRest = new Button("Add a Restaurant");
+        Button addLoc = new Button("Add a Location");
+        Button gotoInsertMenu = new Button("Insert Menu Item");
+        Button AddBranch = new Button("Add a Branch!");
+        Button RateUser = new Button("Rate a User!");
+        Button AlcAuth = new Button("Allocate an Authority!");
+
+        Button logoutadmhome = new Button("LOGOUTADMHOME");
+        Button logoutadmhome1 = new Button("LOGOUTADMHOME");
+        Button logoutadmhome2 = new Button("LOGOUTADMHOME");
+
+        admhomevb.getChildren().addAll(greetadm, admOptions, gotoInsertMenu, addRest, addLoc, AddBranch, RateUser, AlcAuth, logoutadmhome);
+        adminHome = new Scene(admhomevb, 400, 400);
+
+        Scene insertMenuScene;
+        VBox insertMenuvb = new VBox();
+        //Label restnameprompt = new Label("Insert Name of the Item:");
+        //TextField itemnameinput = new TextField();
+        Label itemtypeprompt = new Label("What type of item is this?");
+        TextField itemtypeinput = new TextField();
+        Button imok = new Button("NEXT");
+        //insertMenuvb.getChildren().addAll(restnameprompt, itemnameinput, itemtypeprompt, itemtypeinput, imok);
+        insertMenuvb.getChildren().addAll(itemtypeprompt, itemtypeinput, imok, logoutadmhome1);
+
+        insertMenuScene = new Scene(insertMenuvb, 400, 400);
+
+        imok.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+                try {
+                    String sql = "INSERT INTO MENU_TYPES (TYPE_ID, ITEM_TYPE) VALUES (TYPE_ID_SEQ.NEXTVAL, ?)";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, itemtypeinput.getText());
+                    //pst.setString(2, itemnameinput.getText());
+                    ResultSet rs = pst.executeQuery();
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+                    primaryStage.setScene(adminHome);
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        gotoInsertMenu.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(insertMenuScene);
+            }
+        });
+
+        conC = new ConnectionClass();
+        con = conC.getConnection();
+        List listRest = new ArrayList();
+        List listLoc = new ArrayList();
+        try {
+            String sql = "SELECT RESTAURANT_NAME FROM RESTAURANTS";
+
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                listRest.add(rs.getString(1));
+            }
+            sql = "SELECT LOCATION_NAME FROM LOCATIONS";
+            pst = con.prepareStatement(sql);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                listLoc.add(rs.getString(1));
+            }
+            pst.close();
+            con.close();
+            conC.closeConnection();
+
+            //System.out.println(uname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Scene authorityHome;
+        VBox authhomevb = new VBox();
+        Label greetauth = new Label("Welcome Authority!");
+        Label authOptions = new Label("Press on the button below to insert a menu item!");
+
+        Button setBranchMenuB = new Button("Set up a branch menu item");
+        Button editOffer = new Button("Edit an Offer!");
+        Button removeBranchMenuB = new Button("Remove a branch menu item");
+
+        Button logoutauthhome = new Button("LOGOUTAUTHHOME");
+        logoutauthhome.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+            }
+        });
+
+        authhomevb.getChildren().addAll(greetauth, authOptions, setBranchMenuB, editOffer, removeBranchMenuB, logoutauthhome);
+        authorityHome = new Scene(authhomevb, 400, 400);
+
+        setBranchMenuB.setOnAction(new EventHandler<ActionEvent>() {
+            String MNSelectedLocTHR = new String();
+            String MNSelectedResTHR = new String();
+            String MNSelectedItT = new String();
+            String MNSelectedItN = new String();
+
+            public void handle(ActionEvent event) {
+                Scene menratscene;
+                GridPane RateMN = new GridPane();
+                RateMN.setVgap(20);
+                RateMN.setHgap(20);
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+
+                try {
+
+                    String sql = "SELECT LOCATION_NAME FROM LOCATIONS l join RESTAURANTS_AUTHORITY ra on (l.LOCATION_ID = ra.LOCATION_ID) join AUTHORITIES a on (a.AUTH_ID = ra.AUTH_ID) where AUTH_USER_NAME = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, uname);
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        MNSelectedLocTHR = rs.getString(1);
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                conC = new ConnectionClass();
+                con = conC.getConnection();
+                try {
+
+                    String sql = "SELECT RESTAURANT_NAME FROM RESTAURANTS r join RESTAURANTS_AUTHORITY ra on (r.REST_ID = ra.REST_ID) join AUTHORITIES a on (a.AUTH_ID = ra.AUTH_ID) where AUTH_USER_NAME = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, uname);
+
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        MNSelectedResTHR = rs.getString(1);
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                //System.out.println(MNSelectedLocTHR);
+                //System.out.println(MNSelectedResTHR);
+                ChoiceBox MNRit = new ChoiceBox();
+                conC = new ConnectionClass();
+                con = conC.getConnection();
+                List MNRlistits = new ArrayList();
+
+                //System.out.println(MNSelectedLocTHR);
+                //System.out.println(MNSelectedResTHR);
+                try {
+
+                    String sql = "select DISTINCT ITEM_TYPE from menu_types";
+                    PreparedStatement pst = con.prepareStatement(sql);
+
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        MNRlistits.add(rs.getString(1));
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                MNRit.getItems().addAll(MNRlistits);
+                MNRit.setValue(MNRlistits.get(0));
+                MNRit.setPrefSize(250, 40);
+                RateMN.add(MNRit, 2, 1);
+
+                TextField mname = new TextField();
+                mname.setPrefSize(250, 40);
+                mname.setPromptText("Enter Item Name");
+                RateMN.add(mname, 2, 3);
+
+                TextField mnating = new TextField();
+                mnating.setPrefSize(250, 40);
+                mnating.setPromptText("Enter Price");
+                RateMN.add(mnating, 2, 5);
+
+                TextField mnc = new TextField();
+                mnc.setPrefSize(250, 40);
+                mnc.setPromptText("Enter Offer");
+                RateMN.add(mnc, 2, 7);
+
+                Button MNRok = new Button("Insert");
+
+                RateMN.add(MNRok, 5, 10);
+
+                MNRok.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+
+                        MNSelectedItT = (String) MNRit.getValue();
+                        MNSelectedItN = mname.getText();
+
+                        ConnectionClass conC = new ConnectionClass();
+                        Connection con = conC.getConnection();
+                        try {
+
+                            CallableStatement ins = con.prepareCall("{?= call SET_BRANCH_MENU(?,?,?,?,?,'YES',?)}");
+
+                            ins.setString(2, MNSelectedResTHR);
+                            ins.setString(3, MNSelectedLocTHR);
+                            ins.setString(4, MNSelectedItT);
+                            ins.setString(5, MNSelectedItN);
+                            ins.setDouble(6, Double.parseDouble(mnating.getText()));
+                            ins.setString(7, mnc.getText());
+                            ins.registerOutParameter(1, Types.INTEGER);
+                            ins.execute();
+                            System.out.println(ins.getInt(1));
+
+                            if (ins.getInt(1) != 1) {
+                                Alert alert = new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Insert Error");
+                                alert.setHeaderText("Insert Error");
+                                alert.setContentText("Make sure the branch menu is not already inserted!");
+                                alert.showAndWait();
+                            }
+
+                            ins.close();
+                            con.close();
+                            conC.closeConnection();
+
+                            primaryStage.setScene(authorityHome);
+
+                            //System.out.println(uname);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        //INSERT INTO RESTAURANTS_BRANCHES (REST_ID, LOCATION_ID, MANAGER_NAME, ADDRESS, CONTACT_NUMBER, OPEN_TIME, CLOSE_TIME, WEEKLY_HOLIDAY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)    
+                        //primaryStage.setScene(adminHome);
+
+                    }
+                });
+
+                menratscene = new Scene(RateMN, 500, 500);
+
+                primaryStage.setScene(menratscene);
+
+            }
+        });
+
+        editOffer.setOnAction(new EventHandler<ActionEvent>() {
+            String MNSelectedLocTHR = new String();
+            String MNSelectedResTHR = new String();
+            String MNSelectedItT = new String();
+            String MNSelectedItN = new String();
+
+            public void handle(ActionEvent event) {
+                Scene menratscene;
+                GridPane RateMN = new GridPane();
+                RateMN.setVgap(20);
+                RateMN.setHgap(20);
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+
+                try {
+
+                    String sql = "SELECT LOCATION_NAME FROM LOCATIONS l join RESTAURANTS_AUTHORITY ra on (l.LOCATION_ID = ra.LOCATION_ID) join AUTHORITIES a on (a.AUTH_ID = ra.AUTH_ID) where AUTH_USER_NAME = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, uname);
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        MNSelectedLocTHR = rs.getString(1);
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                conC = new ConnectionClass();
+                con = conC.getConnection();
+                try {
+
+                    String sql = "SELECT RESTAURANT_NAME FROM RESTAURANTS r join RESTAURANTS_AUTHORITY ra on (r.REST_ID = ra.REST_ID) join AUTHORITIES a on (a.AUTH_ID = ra.AUTH_ID) where AUTH_USER_NAME = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, uname);
+
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        MNSelectedResTHR = rs.getString(1);
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                //System.out.println(MNSelectedLocTHR);
+                //System.out.println(MNSelectedResTHR);
+                ChoiceBox MNRit = new ChoiceBox();
+                conC = new ConnectionClass();
+                con = conC.getConnection();
+                List MNRlistits = new ArrayList();
+
+                //System.out.println(MNSelectedLocTHR);
+                //System.out.println(MNSelectedResTHR);
+                try {
+
+                    String sql = "select DISTINCT mi.ITEM_TYPE from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (bm.LOCATION_ID = l.LOCATION_ID) join MENU_ITEMS mi on (mi.ITEM_ID = bm.ITEM_ID) where RESTAURANT_NAME = ? AND LOCATION_NAME = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, MNSelectedResTHR);
+                    pst.setString(2, MNSelectedLocTHR);
+
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        MNRlistits.add(rs.getString(1));
+                    }
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                MNRit.getItems().addAll(MNRlistits);
+                MNRit.setValue(MNRlistits.get(0));
+                MNRit.setPrefSize(250, 40);
+                RateMN.add(MNRit, 2, 1);
+
+                Button b = new Button("Choose");
+                RateMN.add(b, 2, 4);
+
+                b.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        MNSelectedItT = (String) MNRit.getValue();
+
+                        Scene insideb;
+                        GridPane bp = new GridPane();
+                        bp.setVgap(20);
+                        bp.setHgap(20);
+
+                        ChoiceBox bit = new ChoiceBox();
+                        ConnectionClass conC = new ConnectionClass();
+                        Connection con = conC.getConnection();
+                        List blistits = new ArrayList();
+
+                        //System.out.println(MNSelectedLocTHR);
+                        //System.out.println(MNSelectedResTHR);
+                        try {
+
+                            String sql = "select DISTINCT mi.ITEM_NAME from BRANCH_MENUS bm join RESTAURANTS r on (bm.REST_ID = r.REST_ID) join LOCATIONS l on (bm.LOCATION_ID = l.LOCATION_ID) join MENU_ITEMS mi on (mi.ITEM_ID = bm.ITEM_ID) where RESTAURANT_NAME = ? AND LOCATION_NAME = ? AND ITEM_TYPE = ?";
+                            PreparedStatement pst = con.prepareStatement(sql);
+                            pst.setString(1, MNSelectedResTHR);
+                            pst.setString(2, MNSelectedLocTHR);
+                            pst.setString(3, MNSelectedItT);
+
+                            ResultSet rs = pst.executeQuery();
+                            while (rs.next()) {
+                                blistits.add(rs.getString(1));
+                            }
+                            pst.close();
+                            con.close();
+                            conC.closeConnection();
+
+                            //System.out.println(uname);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        bit.getItems().addAll(blistits);
+                        bit.setValue(blistits.get(0));
+                        bit.setPrefSize(250, 40);
+                        bp.add(bit, 2, 1);
+
+                        TextField mnc = new TextField();
+                        mnc.setPrefSize(250, 40);
+                        mnc.setPromptText("Enter Offer");
+                        bp.add(mnc, 2, 7);
+
+                        Button bok = new Button("Insert");
+
+                        bp.add(bok, 5, 10);
+
+                        bok.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent event) {
+                                MNSelectedItN = (String) bit.getValue();
+
+                                System.out.println(MNSelectedItN);
+
+                                ConnectionClass conC = new ConnectionClass();
+                                Connection con = conC.getConnection();
+                                try {
+
+                                    CallableStatement ins = con.prepareCall("{?= call SET_BRANCH_MENU_OFFER(?,?,?,?,?)}");
+
+                                    ins.setString(2, MNSelectedResTHR);
+                                    ins.setString(3, MNSelectedLocTHR);
+                                    ins.setString(4, MNSelectedItT);
+                                    ins.setString(5, MNSelectedItN);
+                                    ins.setString(6, mnc.getText());
+                                    ins.registerOutParameter(1, Types.INTEGER);
+                                    ins.execute();
+                                    System.out.println(ins.getInt(1));
+
+                                    if (ins.getInt(1) != 1) {
+                                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                                        alert.setTitle("Insert Error");
+                                        alert.setHeaderText("Insert Error");
+                                        alert.setContentText("Make sure the branch menu is not already inserted!");
+                                        alert.showAndWait();
+                                    }
+
+                                    ins.close();
+                                    con.close();
+                                    conC.closeConnection();
+
+                                    primaryStage.setScene(authorityHome);
+
+                                    //System.out.println(uname);
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+                                //INSERT INTO RESTAURANTS_BRANCHES (REST_ID, LOCATION_ID, MANAGER_NAME, ADDRESS, CONTACT_NUMBER, OPEN_TIME, CLOSE_TIME, WEEKLY_HOLIDAY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)    
+                                //primaryStage.setScene(adminHome);
+
+                            }
+                        });
+
+                        insideb = new Scene(bp, 500, 500);
+                        primaryStage.setScene(insideb);
+
+                    }
+                });
+
+                menratscene = new Scene(RateMN, 500, 500);
+
+                primaryStage.setScene(menratscene);
+
+            }
+        });
+
+        logoutadmhome.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+            }
+        });
+
+        logoutadmhome1.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+            }
+        });
+
+        logoutadmhome2.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+            }
+        });
+
+        addRest.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Scene insertRestScene;
+                VBox insertRestvb = new VBox();
+                Label rnameprompt = new Label("What is the name of the restaurant?");
+                TextField rnameinput = new TextField();
+                Button rok = new Button("DONE");
+                //insertMenuvb.getChildren().addAll(restnameprompt, itemnameinput, itemtypeprompt, itemtypeinput, imok);
+                insertRestvb.getChildren().addAll(rnameprompt, rnameinput, rok, logoutadmhome1);
+
+                rok.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        ConnectionClass conC = new ConnectionClass();
+                        Connection con = conC.getConnection();
+                        try {
+                            String sql = "INSERT INTO Restaurants (REST_ID, RESTAURANT_NAME) VALUES (REST_ID_SEQ.NEXTVAL, ?)";
+                            PreparedStatement pst = con.prepareStatement(sql);
+                            pst.setString(1, rnameinput.getText());
+                            //pst.setString(2, itemnameinput.getText());
+                            ResultSet rs = pst.executeQuery();
+                            pst.close();
+                            con.close();
+                            conC.closeConnection();
+                            primaryStage.setScene(adminHome);
+                            //System.out.println(uname);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                insertRestScene = new Scene(insertRestvb, 400, 400);
+                primaryStage.setScene(insertRestScene);
+            }
+        });
+
+        addLoc.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Scene insertLocScene;
+                VBox insertLocvb = new VBox();
+                Label lnameprompt = new Label("Where is the location?");
+                TextField lnameinput = new TextField();
+                Button lok = new Button("DONE");
+                //insertMenuvb.getChildren().addAll(restnameprompt, itemnameinput, itemtypeprompt, itemtypeinput, imok);
+                insertLocvb.getChildren().addAll(lnameprompt, lnameinput, lok, logoutadmhome1);
+
+                lok.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        ConnectionClass conC = new ConnectionClass();
+                        Connection con = conC.getConnection();
+                        try {
+                            String sql = "INSERT INTO LOCATIONS (LOCATION_ID, LOCATION_NAME) VALUES (LOCATION_ID_SEQ.NEXTVAL, ?)";
+                            PreparedStatement pst = con.prepareStatement(sql);
+                            pst.setString(1, lnameinput.getText());
+                            //pst.setString(2, itemnameinput.getText());
+                            ResultSet rs = pst.executeQuery();
+                            pst.close();
+                            con.close();
+                            conC.closeConnection();
+                            primaryStage.setScene(adminHome);
+                            //System.out.println(uname);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                insertLocScene = new Scene(insertLocvb, 400, 400);
+                primaryStage.setScene(insertLocScene);
+            }
+        });
+
+        RateUser.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Scene rateUserScene;
+                VBox rateUservb = new VBox();
+                Label unameprompt = new Label("What is the username of the customer?");
+                TextField unameinput = new TextField();
+                ChoiceBox c = new ChoiceBox();
+                c.getItems().addAll("10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0");
+                c.setValue("10");
+
+                Button uok = new Button("DONE");
+                //insertMenuvb.getChildren().addAll(restnameprompt, itemnameinput, itemtypeprompt, itemtypeinput, imok);
+                rateUservb.getChildren().addAll(unameprompt, unameinput, c, uok, logoutadmhome1);
+
+                uok.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        ConnectionClass conC = new ConnectionClass();
+                        Connection con = conC.getConnection();
+                        try {
+                            String sql = "update users set user_score = ? where username = ?";
+                            PreparedStatement pst = con.prepareStatement(sql);
+                            pst.setInt(1, Integer.parseInt((String) c.getValue()));
+                            pst.setString(2, unameinput.getText());
+                            //pst.setString(2, itemnameinput.getText());
+                            ResultSet rs = pst.executeQuery();
+                            pst.close();
+                            con.close();
+                            conC.closeConnection();
+                            primaryStage.setScene(adminHome);
+                            //System.out.println(uname);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                rateUserScene = new Scene(rateUservb, 400, 400);
+                primaryStage.setScene(rateUserScene);
+            }
+        });
+
+        Scene insertBranchScene;
+        VBox insertBranchvb = new VBox();
+
+        ChoiceBox admListRestaurants = new ChoiceBox();
+        admListRestaurants.getItems().addAll(listRest);
+        admListRestaurants.setValue(listRest.get(0));
+        ChoiceBox admListLocs = new ChoiceBox();
+        admListLocs.getItems().addAll(listLoc);
+        admListLocs.setValue(listLoc.get(0));
+        Button admAddBranch = new Button("Confirm Restaurant!");
+        TextField mngrname = new TextField();
+        mngrname.setPromptText("MANAGER_NAME");
+        TextField adrs = new TextField();
+        adrs.setPromptText("Address");
+        TextField num = new TextField();
+        num.setPromptText("Contact Number");
+        TextField opentime = new TextField();
+        opentime.setPromptText("Open Time");
+        TextField closetime = new TextField();
+        closetime.setPromptText("Close Time");
+        ChoiceBox holiday = new ChoiceBox();
+        holiday.getItems().addAll("FRIDAY", "SATURDAY", "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY");
+        holiday.setValue("FRIDAY");
+        //holiday.setPrefSize(250, 40);
+
+        //TextField holiday = new TextField();
+        //holiday.setPromptText("Weekly Holiday");
+        insertBranchvb.getChildren().addAll(admListRestaurants, admListLocs, mngrname, adrs, num, opentime, closetime, holiday, admAddBranch, logoutadmhome2);
+        insertBranchScene = new Scene(insertBranchvb, 400, 400);
+
+        AddBranch.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(insertBranchScene);
+            }
+        });
+
+        admAddBranch.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                int restid = 0, locid = 0;
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+                try {
+                    String sql = "select rest_id from restaurants where RESTAURANT_NAME = ?";
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, (String) admListRestaurants.getValue());
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        restid = rs.getInt(1);
+                    }
+
+                    sql = "select location_id from locations where location_name = ?";
+                    pst = con.prepareStatement(sql);
+                    pst.setString(1, (String) admListLocs.getValue());
+                    rs = pst.executeQuery();
+                    while (rs.next()) {
+                        locid = rs.getInt(1);
+                    }
+
+                    pst.close();
+                    CallableStatement ins = con.prepareCall("{?= call SET_REST_BRANCHES(?,?,?,?,?,?,?,?)}");
+
+                    ins.setString(2, (String) admListRestaurants.getValue());
+                    ins.setString(3, (String) admListLocs.getValue());
+                    ins.setString(4, mngrname.getText());
+                    ins.setString(5, adrs.getText());
+                    ins.setString(6, num.getText());
+                    ins.setString(7, opentime.getText());
+                    ins.setString(8, closetime.getText());
+                    ins.setString(9, (String) holiday.getValue());
+                    ins.registerOutParameter(1, Types.INTEGER);
+                    ins.execute();
+                    System.out.println(ins.getInt(1));
+
+                    if (ins.getInt(1) != 1) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Insert Error");
+                        alert.setHeaderText("Insert Error");
+                        alert.setContentText("Make sure the branch is not already registered!");
+                        alert.showAndWait();
+                    }
+
+                    ins.close();
+                    con.close();
+                    conC.closeConnection();
+
+                    //System.out.println(uname);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                //INSERT INTO RESTAURANTS_BRANCHES (REST_ID, LOCATION_ID, MANAGER_NAME, ADDRESS, CONTACT_NUMBER, OPEN_TIME, CLOSE_TIME, WEEKLY_HOLIDAY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)    
+
+            }
+        });
+
+        backfromtbb.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(adminHome);
+            }
+        });
+
+        //primaryStage.setScene(signupScene);
+        //primaryStage.setTitle("Signup");
+        /*liokButton.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event){
+                
+            }
+        });*/
+        toli.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+                primaryStage.setTitle("Welcome!");
+            }
+        });
+
+        liokButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                uname = usernameli.getText();
+                String pass = passwordli.getText();
+                System.out.println(uname + pass);
+                //primaryStage.setScene(scene);
+                boolean success = false;
+                if ((String) usertype.getValue() == "User") {
+                    success = new Users().validateLogin(uname, pass);
+                } else if ((String) usertype.getValue() == "Admin") {
+                    success = new Admins().validateLogin(uname, pass);
+                } else if ((String) usertype.getValue() == "Authority") {
+                    success = new Authorities().validateLogin(uname, pass);
+                }
+
+                if (success && (String) usertype.getValue() == "User") {
+                    // successful login
+                    try {
+                        Text welcomeUserText = new Text("Welcome " + uname + "!");
+                        welcomeUserText.setFont(Font.font("Verdana", 20));
+                        // welcomeUserLabel.setMinSize(50, 50);
+                        welcomeUserText.setId("WelcomeUserText");
+                        hsGridPane.add(welcomeUserText, 5, 3);
+                        
+                        primaryStage.setScene(HomeScene); // ei jaygay homeScene ashbe
+                        primaryStage.setTitle("Home");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                } else if (success && (String) usertype.getValue() == "Admin") {
+                    //System.out.println("Admin Logged in");
+                    try {
+                        primaryStage.setScene(adminHome);
+                        primaryStage.setTitle("Home");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                } else if (success && (String) usertype.getValue() == "Authority") {
+                    //System.out.println("Admin Logged in");
+                    try {
+                        primaryStage.setScene(authorityHome);
+                        primaryStage.setTitle("Home");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    // failed login
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Incorrect Credentials");
+                    alert.setHeaderText("Incorrect Credentials");
+                    alert.setContentText("The username and password you provided is not correct.");
+                    alert.showAndWait();
+                }
+
+            }
+        });
+
+        toSignup.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(signupScene);
+                primaryStage.setTitle("Sign UP");
+            }
+        });
+
+        Scene suSuccess;
+        Label signedUp = new Label("Congrats! Sign Up Successful!");
+        Button toWelcomeScene = new Button("Log in");
+        VBox sus = new VBox();
+        sus.getChildren().addAll(signedUp, toWelcomeScene);
+        suSuccess = new Scene(sus, 400, 400);
+
+        toWelcomeScene.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(loginScene);
+                primaryStage.setTitle("Welcome!");
+            }
+        });
+
+        suokButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String fname, lname, email, number, gender, password;
+                uname = usernameInput.getText();
+                fname = FirstNameInput.getText();
+                lname = LastNameInput.getText();
+                email = emailInput.getText();
+                number = PhoneInput.getText();
+                gender = (String) genderbox.getValue();
+                password = pb.getText();
+
+                //primaryStage.setScene(scene);
+                ConnectionClass conC = new ConnectionClass();
+                Connection con = conC.getConnection();
+
+                try {
+
+                    String sql = "INSERT into users (user_id, username, email, FIRSTNAME, LASTNAME, PASSWORD, USER_NUMBER, GENDER) values (user_id_seq.nextval, ? , ? , ? , ? , ? , ? , ?)";
+
+                    PreparedStatement pst = con.prepareStatement(sql);
+                    pst.setString(1, uname);
+                    pst.setString(2, email);
+                    pst.setString(3, fname);
+                    pst.setString(4, lname);
+                    pst.setString(5, password);
+                    pst.setString(6, number);
+                    pst.setString(7, gender);
+
+                    ResultSet rs = pst.executeQuery();
+
+                    pst.close();
+                    con.close();
+                    conC.closeConnection();
+
+                    //System.out.println(uname);
+                    primaryStage.setScene(suSuccess);
+
+                } catch (SQLException e) {
+                    System.out.println("Invalid Sign Up!");
+                    //e.printStackTrace();
+                    //System.out.println("Not printed");
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Invalid Sign Up");
+                    alert.setHeaderText("Invalid Sign Up");
+                    alert.setContentText("Please fill all the fields or try a different username!");
+                    alert.showAndWait();
+                }
+
+            }
+
+        });
+    }
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+}
